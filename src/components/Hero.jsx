@@ -26,11 +26,11 @@ export default function Hero() {
 
           <div className="flex flex-wrap items-center gap-4 mt-8">
             <Link
-  to="/login?tab=create"
-  className="inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-[15px] px-6 py-3.5 rounded-lg transition-colors"
->
-  Start Today <ArrowRight size={17} />
-</Link>
+              to="/login?tab=create"
+              className="inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-[15px] px-6 py-3.5 rounded-lg transition-colors"
+            >
+              Start Today <ArrowRight size={17} />
+            </Link>
             {/* <a
               href="#demo"
               className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-ink font-medium text-[15px] px-6 py-3.5 rounded-lg transition-colors"
@@ -53,10 +53,10 @@ export default function Hero() {
 
         <div className="relative max-w-md mx-auto lg:mx-0 lg:ml-auto">
           <img
-  src="https://picsum.photos/seed/medflow-hero/600/750"
-  alt="Doctor with patient"
-  className="rounded-xl2 shadow-2xl aspect-[4/5] w-full object-cover rotate-2"
-/>
+            src="https://picsum.photos/seed/medflow-hero/600/750"
+            alt="Doctor with patient"
+            className="rounded-xl2 shadow-2xl aspect-[4/5] w-full object-cover rotate-2"
+          />
 
           <div className="absolute -left-6 top-10 bg-white rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 border border-slate-100">
             <div className="w-9 h-9 rounded-lg bg-brand flex items-center justify-center shrink-0">

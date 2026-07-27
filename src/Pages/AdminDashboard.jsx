@@ -126,7 +126,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Queue Overview */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-ink text-[17px]">Queue Overview</h2>
@@ -163,7 +162,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* System Performance */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 grid md:grid-cols-[1fr_260px] gap-6 items-center">
         <div>
           <h2 className="font-display font-extrabold text-brand text-[19px] mb-2">System Performance</h2>
@@ -183,7 +181,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Simple bar chart, same technique as vitals trend */}
         <div className="bg-slate-50 rounded-lg h-32 flex items-end justify-between gap-2 p-4">
           {[45, 65, 40, 85, 60, 30].map((h, i) => (
             <div

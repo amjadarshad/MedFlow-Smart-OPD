@@ -46,8 +46,7 @@ export default function VisionMissionTeam() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
           {TEAM.map((member) => (
             <div key={member.name}>
-              {/* Replace this gradient with an actual headshot:
-                  <img src={photo} className="w-full aspect-[4/5] object-cover rounded-lg mb-3" /> */}
+              
 <img src={member.photo} alt={member.name} className="w-full aspect-[4/5] rounded-lg object-cover mb-3" />              <p className="font-bold text-ink text-[14.5px]">{member.name}</p>
               <p className="text-brand text-[11.5px] font-bold uppercase tracking-wide">{member.role}</p>
             </div>

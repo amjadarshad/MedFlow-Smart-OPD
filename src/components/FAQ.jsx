@@ -35,7 +35,6 @@ function FAQItem({ question, answer, isOpen, onClick }) {
         />
       </button>
 
-      {/* Answer sirf tab render hota hai jab isOpen true ho */}
       {isOpen && (
         <div className="px-6 pb-5">
           <p className="text-slate-600 text-[14.5px] leading-relaxed">{answer}</p>
@@ -46,11 +45,9 @@ function FAQItem({ question, answer, isOpen, onClick }) {
 }
 
 export default function FAQ() {
-  // openIndex batata hai kaunsa FAQ khula hai. null = koi bhi nahi.
   const [openIndex, setOpenIndex] = useState(null);
 
   function toggle(index) {
-    // Agar wahi item dobara click hua to band kar do (null), warna wo index khol do
     setOpenIndex((prev) => (prev === index ? null : index));
   }
 

@@ -19,8 +19,7 @@ export default function GlobalPresence() {
           </p>
         </div>
 
-        {/* Map placeholder — replace with a real map (e.g. react-simple-maps or Mapbox)
-            when you're ready to wire this up to live data. */}
+      
         <div className="relative bg-slate-100 rounded-xl border border-slate-200 overflow-hidden h-72 flex items-center justify-center">
           <Globe2 size={64} className="text-slate-300" />
           {OFFICES.map((office) => (

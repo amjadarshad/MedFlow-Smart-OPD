@@ -144,34 +144,27 @@ export default function Telemedicine() {
 
   return (
     <div>
-      {/* Top status bar */}
       <div className="flex items-center gap-2 mb-4">
         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
         <p className="text-[13px] font-semibold text-ink">Live Consultation: Patient ID #8842</p>
       </div>
 
       <div className="grid xl:grid-cols-[1fr_340px] gap-6">
-        {/* LEFT: video area */}
         <div className="relative rounded-xl overflow-hidden bg-slate-800 aspect-[4/3] xl:aspect-auto xl:min-h-[520px]">
-          {/* Replace this gradient with the live video stream / <video> element */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800" />
 
-          {/* Patient info badge */}
           <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-3.5 py-2">
             <p className="text-white font-bold text-[13px]">Eleanor Rigby, 74</p>
             <p className="text-slate-300 text-[11px]">📍 London, UK</p>
           </div>
 
-          {/* Call timer */}
           <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-mint" />
             <span className="text-white text-[12px] font-semibold">15:15</span>
           </div>
 
-          {/* Self-view picture-in-picture */}
           <div className="absolute bottom-20 right-4 w-24 h-16 rounded-lg bg-slate-500 border-2 border-white/30" />
 
-          {/* Floating control bar */}
           <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-2.5">
             <button className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors">
               <Mic size={16} />
@@ -192,7 +185,6 @@ export default function Telemedicine() {
           </div>
         </div>
 
-        {/* RIGHT: tabbed panel */}
         <div className="bg-white rounded-xl border border-slate-200 flex flex-col">
           <div className="flex border-b border-slate-200 shrink-0">
             <button
@@ -219,7 +211,6 @@ export default function Telemedicine() {
         </div>
       </div>
 
-      {/* Quick action cards */}
       <div className="grid sm:grid-cols-4 gap-4 mt-6">
         {QUICK_ACTIONS.map(({ label, sublabel, icon: Icon }) => (
           <button

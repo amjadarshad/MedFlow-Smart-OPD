@@ -23,7 +23,7 @@ export default function AboutHero() {
           focus on what matters most: the patient.
         </p>
         <div className="flex items-center justify-center gap-4">
-          {/* Join button with query param */}
+          
           <Link
             to="/login?tab=create"
             className="bg-brand hover:bg-brand-dark text-white font-semibold text-[14px] px-6 py-3 rounded-lg transition-colors"
@@ -31,7 +31,7 @@ export default function AboutHero() {
             Join Our Journey
           </Link>
           
-          {/* Fixed missing opening <a> tag here */}
+         
           <a
             href="#impact"
             className="border border-brand text-brand font-semibold text-[14px] px-6 py-3 rounded-lg hover:bg-brand-light transition-colors"
