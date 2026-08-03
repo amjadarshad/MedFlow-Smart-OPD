@@ -3,9 +3,9 @@ import { Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashboardLayout from "./pages/DashboardLayout.jsx";
-import PatientDashboard from "./Pages/PatientDashboard.jsx";
+import PatientDashboard from "./pages/PatientDashboard.jsx";
 import DoctorAppointments from "./pages/DoctorAppointments.jsx";
-import AdminDashboard from "./Pages/AdminDashboard.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 import BookAppointment from "./pages/BookAppointment.jsx";
 import PrescriptionConsole from "./pages/PrescriptionConsole.jsx";
 import QueueStatus from "./pages/QueueStatus.jsx";
@@ -30,9 +30,8 @@ export default function App() {
         <Route path="billing" element={<Billing />} />
         <Route path="records" element={<MedicalRecords />} />
       </Route>
-      <Route path="/" element={<LandingPage />} />
+      
       <Route path="/about" element={<AboutUs />} />
-      <Route path="/login" element={<LoginPage />} />
 
     </Routes>
   );

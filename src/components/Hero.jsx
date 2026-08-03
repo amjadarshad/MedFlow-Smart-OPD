@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, ArrowRight, Stethoscope, Users } from "lucide-react";
 
+
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-white via-[#F3F6FF] to-[#E4EBFF]">
@@ -31,12 +32,7 @@ export default function Hero() {
             >
               Start Today <ArrowRight size={17} />
             </Link>
-            {/* <a
-              href="#demo"
-              className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-ink font-medium text-[15px] px-6 py-3.5 rounded-lg transition-colors"
-            >
-              View Demo
-            </a> */}
+          
           </div>
 
           <div className="flex items-center gap-3 mt-10">

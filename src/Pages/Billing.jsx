@@ -4,77 +4,18 @@ import {
   X, Printer, Mail, Eye, MoreVertical, AlertTriangle, History,
   CheckCircle2, FileText, XCircle, RefreshCcw,
 } from "lucide-react";
-
-const KPIS = [
-  { label: "Total Revenue (Monthly)", value: "$124,500.00", note: "↗ +12.5% from last month", icon: Wallet },
-  { label: "Pending Payments", value: "$12,430.50", note: "⚠ 14 Invoices Overdue", icon: Clock },
-];
-
-const INVOICES = [
-  { initials: "JD", avatarBg: "bg-brand", patient: "John Doe", id: "P-9821", date: "Oct 24, 2023", invoiceNo: "#INV-2023-001", amount: "$450.00", status: "Paid" },
-  { initials: "AS", avatarBg: "bg-mint", patient: "Alice Smith", id: "P-9822", date: "Oct 25, 2023", invoiceNo: "#INV-2023-002", amount: "$1,200.00", status: "Pending" },
-  { initials: "RW", avatarBg: "bg-red-400", patient: "Robert Wilson", id: "P-9755", date: "Oct 12, 2023", invoiceNo: "#INV-2023-003", amount: "$280.00", status: "Overdue" },
-  { initials: "ML", avatarBg: "bg-slate-400", patient: "Maria Lopez", id: "P-9911", date: "Oct 26, 2023", invoiceNo: "#INV-2023-004", amount: "$89.00", status: "Paid" },
-];
-
-const ACTIVITY = [
-  { icon: CheckCircle2, tint: "text-emerald-600", bg: "bg-mint-light", title: "Payment Received", detail: "John Doe paid $450.00 via Credit Card", time: "2 mins ago" },
-  { icon: FileText, tint: "text-brand", bg: "bg-brand-light", title: "New Invoice Generated", detail: "#INV-2023-088 for Alice Smith", time: "45 mins ago" },
-  { icon: XCircle, tint: "text-red-500", bg: "bg-red-50", title: "Payment Failed", detail: "Card transaction declined for Mike Ross", time: "2 hours ago" },
-  { icon: RefreshCcw, tint: "text-emerald-600", bg: "bg-mint-light", title: "Auto-Payment Success", detail: "Subscription renewed for Sarah Connor", time: "5 hours ago" },
-];
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const INCOME_SERIES = [30, 45, 38, 60, 50, 25, 20];
-const PROJECTED_SERIES = [35, 40, 45, 55, 58, 40, 35];
-
-const PAYMENT_METHODS = [
-  { label: "Credit Card", value: "65%", amount: "$80k", color: "text-brand" },
-  { label: "Cash", value: "15%", amount: "$18k", color: "text-slate-600" },
-  { label: "Insurance", value: "18%", amount: "$22k", color: "text-brand" },
-  { label: "Others", value: "2%", amount: "$4.5k", color: "text-slate-600" },
-];
-
-const STATUS_STYLES = {
-  Paid: "bg-mint-light text-emerald-700",
-  Pending: "bg-amber-50 text-amber-600",
-  Overdue: "bg-red-50 text-red-600",
-};
-
-/* --- Simple two-line SVG chart, same coordinate-math idea as the donut chart --- */
-function LineChart({ seriesA, seriesB, labels }) {
-  const width = 600;
-  const height = 140;
-  const max = Math.max(...seriesA, ...seriesB);
-  const stepX = width / (labels.length - 1);
-
-  function toPoints(series) {
-    return series
-      .map((val, i) => `${i * stepX},${height - (val / max) * height}`)
-      .join(" ");
-  }
-
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-36" preserveAspectRatio="none">
-      <polyline points={toPoints(PROJECTED_SERIES)} fill="none" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 4" />
-      <polyline points={toPoints(seriesA)} fill="none" stroke="#1652F0" strokeWidth="2.5" />
-    </svg>
-  );
-}
-
-function KPICard({ label, value, note, icon: Icon, children }) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-[12px] font-semibold text-brand">{label}</p>
-        <Icon size={16} className="text-slate-300" />
-      </div>
-      <p className="font-display font-extrabold text-[24px] text-ink mb-1">{value}</p>
-      {note && <p className="text-[12px] text-slate-500">{note}</p>}
-      {children}
-    </div>
-  );
-}
+import LineChart from "../components/functions/LineChart.jsx";
+import BillingKPICard from "../components/functions/BillingKPICard.jsx";
+import {
+  billingKpis as KPIS,
+  invoices as INVOICES,
+  billingActivity as ACTIVITY,
+  revenueDays as DAYS,
+  incomeSeries as INCOME_SERIES,
+  projectedSeries as PROJECTED_SERIES,
+  paymentMethods as PAYMENT_METHODS,
+  invoiceStatusStyles as STATUS_STYLES,
+} from "../data/allData";
 
 export default function Billing() {
   const [statusFilter, setStatusFilter] = useState("All");
@@ -99,8 +40,8 @@ export default function Billing() {
 
       {/* KPI row */}
       <div className="grid sm:grid-cols-3 gap-4 mb-6">
-        <KPICard label="Total Revenue (Monthly)" value="$124,500.00" note="↗ +12.5% from last month" icon={Wallet} />
-        <KPICard label="Pending Payments" value="$12,430.50" note="⚠ 14 Invoices Overdue" icon={Clock} />
+        <BillingKPICard label="Total Revenue (Monthly)" value="$124,500.00" note="↗ +12.5% from last month" icon={Wallet} />
+        <BillingKPICard label="Pending Payments" value="$12,430.50" note="⚠ 14 Invoices Overdue" icon={Clock} />
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center justify-between mb-3">
             <p className="text-[12px] font-semibold text-brand">Collection Rate</p>

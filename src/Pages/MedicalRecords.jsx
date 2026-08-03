@@ -3,60 +3,8 @@ import {
   Search, Upload, Activity, Pencil, ShieldAlert, Syringe, CheckCircle2,
   Clock, FileText, Image as ImageIcon, FileCheck2,
 } from "lucide-react";
-
-const CONDITIONS = [
-  { name: "Type 2 Diabetes", detail: "Diagnosed Oct 2021", tag: "CHRONIC", tagStyle: "bg-red-50 text-red-600" },
-  { name: "Hypertension", detail: "Diagnosed Jan 2019", tag: "STABLE", tagStyle: "bg-mint-light text-emerald-700" },
-];
-
-const ALLERGIES = [
-  { label: "Penicillin (Severe)", style: "bg-red-100 text-red-700" },
-  { label: "Peanuts (Moderate)", style: "bg-amber-100 text-amber-700" },
-  { label: "Dust Mites", style: "bg-slate-100 text-slate-600" },
-];
-
-const IMMUNIZATIONS = [
-  { name: "Flu Vaccine (Seasonal)", detail: "Administered: Oct 12, 2023", done: true },
-  { name: "Tetanus Booster", detail: "Administered: June 15, 2021", done: true },
-  { name: "Covid-19 Booster", detail: "Due: In 2 Months", done: false },
-];
-
-const TIMELINE = [
-  { date: "MAR 15, 2024", title: "Annual Physical Exam", detail: "General check-up, vitals stable. Recommended slight adjustment in Vitamin D dosage. Next follow-up in 12 months.", by: "Dr. Sarah Miller", meta: "2 Files", tag: "COMPLETED", tagStyle: "bg-brand-light text-brand", current: true },
-  { date: "JAN 22, 2024", title: "Blood Panel & Glucose Test", detail: "Fasting glucose levels checked. Results indicate stable management of type 2 diabetes. HbA1C at 6.4%.", by: "City Lab Services", meta: "1 Report", tag: "LAB WORK", tagStyle: "bg-slate-100 text-slate-600" },
-  { date: "DEC 05, 2023", title: "Specialist Consultation (Cardio)", detail: "", by: "Dr. James Chen", meta: "", tag: "REFERRAL", tagStyle: "bg-slate-100 text-slate-600" },
-];
-
-const LAB_REPORTS = [
-  { name: "HbA1C_Report_March.pdf", date: "Mar 15, 2024", icon: FileText, preview: "bg-slate-100" },
-  { name: "Chest_Xray_Scan.jpg", date: "Feb 02, 2024", icon: ImageIcon, preview: "bg-slate-700" },
-  { name: "Lipid_Profile_Jan.pdf", date: "Jan 23, 2024", icon: FileCheck2, preview: "bg-slate-100" },
-];
-
-function TimelineEntry({ date, title, detail, by, meta, tag, tagStyle, current, isLast }) {
-  return (
-    <div className="flex gap-4">
-      <div className="flex flex-col items-center shrink-0">
-        <span className={`w-3 h-3 rounded-full border-2 ${current ? "bg-brand border-brand" : "bg-white border-slate-300"}`} />
-        {!isLast && <span className="w-px flex-1 bg-slate-200 mt-1" />}
-      </div>
-      <div className={isLast ? "" : "pb-6"}>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-[11px] font-bold text-slate-400">{date}</span>
-        </div>
-        <div className="flex items-start justify-between gap-3">
-          <p className="font-bold text-ink text-[14.5px]">{title}</p>
-          <span className={`shrink-0 text-[10.5px] font-bold px-2.5 py-1 rounded-full ${tagStyle}`}>{tag}</span>
-        </div>
-        {detail && <p className="text-slate-500 text-[13px] leading-relaxed mt-1 mb-2">{detail}</p>}
-        <div className="flex items-center gap-3 text-[12px] text-slate-500">
-          <span>👤 {by}</span>
-          {meta && <span>📎 {meta}</span>}
-        </div>
-      </div>
-    </div>
-  );
-}
+import MedicalRecordsTimelineEntry from "../components/functions/MedicalRecordsTimelineEntry.jsx";
+import { conditions as CONDITIONS, allergies as ALLERGIES, immunizations as IMMUNIZATIONS, visitTimeline as TIMELINE, labReports as LAB_REPORTS } from "../data/allData";
 
 export default function MedicalRecords() {
   const [timelineFilter, setTimelineFilter] = useState("6months"); // "6months" | "all"
@@ -180,7 +128,7 @@ export default function MedicalRecords() {
 
             <div>
               {TIMELINE.map((entry, i) => (
-                <TimelineEntry key={entry.title} {...entry} isLast={i === TIMELINE.length - 1} />
+                <MedicalRecordsTimelineEntry key={entry.title} {...entry} isLast={i === TIMELINE.length - 1} />
               ))}
             </div>
 

@@ -1,12 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, Mail, Lock, Eye, EyeOff, ArrowRight, User, BriefcaseMedical, ShieldCheck, Chrome, Facebook } from "lucide-react";
+import { loginRoles as ROLES } from "../data/allData.js";
 
-const ROLES = [
-  { id: "patient", label: "Patient", icon: User },
-  { id: "doctor", label: "Doctor", icon: BriefcaseMedical },
-  { id: "admin", label: "Admin", icon: ShieldCheck },
-];
 
 export default function LoginPage() {
   const navigate = useNavigate();

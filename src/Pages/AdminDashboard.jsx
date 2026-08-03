@@ -1,43 +1,7 @@
 import React from "react";
-import {
-  Download, PlusCircle, Users, UserPlus, Wallet, CalendarClock,
-  Ticket, Link2, AlertTriangle,
-} from "lucide-react";
-
-const KPIS = [
-  { label: "Total Patients", value: "12,842", note: "↗ +12% from last month", noteColor: "text-emerald-600", icon: Users },
-  { label: "Total Doctors", value: "48", note: "6 currently on-call", noteColor: "text-slate-500", icon: UserPlus },
-  { label: "Revenue", value: "$42,390", note: "↗ 8.4% daily growth", noteColor: "text-emerald-600", icon: Wallet },
-  { label: "Today's Appointments", value: "156", note: "⚠ 12 pending approvals", noteColor: "text-amber-600", icon: CalendarClock },
-];
-
-const APPROVALS = [
-  { initials: "RA", avatarBg: "bg-brand", name: "Robert Anderson", id: "#P-9021", doctor: "Dr. Emily Stone", dept: "Cardiology", type: "PHYSICAL", action: "Issue Token", actionIcon: Ticket },
-  { initials: "ML", avatarBg: "bg-mint", name: "Maria Lopez", id: "#P-8812", doctor: "Dr. Alan Turing", dept: "Neurology", type: "VIRTUAL", action: "Create Link", actionIcon: Link2 },
-  { initials: "JW", avatarBg: "bg-slate-500", name: "James Wilson", id: "#P-9155", doctor: "Dr. Sarah Connor", dept: "Pediatrics", type: "PHYSICAL", action: "Issue Token", actionIcon: Ticket },
-];
-
-const QUEUE_ROOMS = [
-  { room: "Room 102 · Cardiology", doctor: "Dr. Emily Stone", borderColor: "border-mint", status: "C-014", statusLabel: "Current Token", statusColor: "text-mint" },
-  { room: "Room 105 · Neurology", doctor: "Dr. Alan Turing", borderColor: "border-brand", status: "N-008", statusLabel: "Current Token", statusColor: "text-brand" },
-  { room: "Room 201 · General", doctor: "Empty", borderColor: "border-slate-300", status: "Idle", statusLabel: null, statusColor: "text-slate-400", isBadge: true },
-  { room: "Room 204 · Emergency", doctor: "Critical Case", borderColor: "border-red-500", status: "Locked", statusLabel: null, statusColor: "text-red-500", isBadge: true, icon: true },
-];
-
-function KPICard({ label, value, note, noteColor, icon: Icon }) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-[10.5px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
-        <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-          <Icon size={14} className="text-slate-500" />
-        </div>
-      </div>
-      <p className="font-display font-extrabold text-[24px] text-ink mb-1">{value}</p>
-      <p className={`text-[12px] font-medium ${noteColor}`}>{note}</p>
-    </div>
-  );
-}
+import { Download, PlusCircle, Users, UserPlus, Wallet, CalendarClock, Ticket, Link2, AlertTriangle,} from "lucide-react";
+import AdminKPICard from "../components/functions/AdminKPICard.jsx";
+import { adminKpis as KPIS, approvals as APPROVALS, queueRooms as QUEUE_ROOMS } from "../data/allData";
 
 export default function AdminDashboard() {
   return (
@@ -63,7 +27,7 @@ export default function AdminDashboard() {
       {/* KPI row */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {KPIS.map((kpi) => (
-          <KPICard key={kpi.label} {...kpi} />
+          <AdminKPICard key={kpi.label} {...kpi} />
         ))}
       </div>
 
@@ -106,9 +70,8 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-4 py-3.5">
                       <span
-                        className={`text-[10.5px] font-bold uppercase px-2.5 py-1 rounded ${
-                          row.type === "VIRTUAL" ? "bg-brand-light text-brand" : "bg-slate-100 text-slate-600"
-                        }`}
+                        className={`text-[10.5px] font-bold uppercase px-2.5 py-1 rounded ${row.type === "VIRTUAL" ? "bg-brand-light text-brand" : "bg-slate-100 text-slate-600"
+                          }`}
                       >
                         {row.type}
                       </span>

@@ -1,12 +1,6 @@
 import React from "react";
 import { Globe2, Mail } from "lucide-react";
-
-const OFFICES = [
-  { name: "Bangalore", x: "68%", y: "58%", isHQ: true },
-  { name: "Dubai", x: "60%", y: "48%" },
-  { name: "Singapore", x: "74%", y: "62%" },
-  { name: "London", x: "48%", y: "28%" },
-];
+import { globalOffices as GLOBAL_OFFICES } from "../../data/allData.js";
 
 export default function GlobalPresence() {
   return (
@@ -22,7 +16,7 @@ export default function GlobalPresence() {
       
         <div className="relative bg-slate-100 rounded-xl border border-slate-200 overflow-hidden h-72 flex items-center justify-center">
           <Globe2 size={64} className="text-slate-300" />
-          {OFFICES.map((office) => (
+          {GLOBAL_OFFICES.map((office) => (
             <div
               key={office.name}
               className="absolute flex flex-col items-center -translate-x-1/2 -translate-y-1/2"

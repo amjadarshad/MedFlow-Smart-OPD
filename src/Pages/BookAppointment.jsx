@@ -1,73 +1,16 @@
 import React, { useState } from "react";
-import { ShieldCheck, HelpCircle, Check } from "lucide-react";
-
-const STEPS = ["Specialization", "Schedule", "Details"];
-
-const DEPARTMENTS = ["Cardiology", "Neurology", "Pediatrics", "General Medicine"];
-
-const DOCTORS = [
-  { id: "dr-johnson", name: "Dr. S. Johnson", dept: "Cardiology", fullTitle: "Dr. Sarah Johnson (Senior Cardiologist)", photo: "https://i.pravatar.cc/150?img=47" },
-  { id: "dr-chen", name: "Dr. M. Chen", dept: "Cardiology", fullTitle: "Dr. M. Chen (Cardiologist)", photo: "https://i.pravatar.cc/150?img=13" },
-  { id: "dr-rodriguez", name: "Dr. E. Rodriguez", dept: "Neurology", fullTitle: "Dr. E. Rodriguez (Neurologist)", photo: "https://i.pravatar.cc/150?img=32" },
-];
-
-function StepIndicator({ currentStep }) {
-  return (
-    <div className="flex items-center mb-8">
-      {STEPS.map((label, i) => {
-        const stepNum = i + 1;
-        const isActive = stepNum === currentStep;
-        const isDone = stepNum < currentStep;
-        return (
-          <React.Fragment key={label}>
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold ${
-                  isDone
-                    ? "bg-mint text-white"
-                    : isActive
-                    ? "bg-brand text-white"
-                    : "bg-white border border-slate-300 text-slate-400"
-                }`}
-              >
-                {isDone ? <Check size={16} /> : stepNum}
-              </div>
-              <span
-                className={`text-[12px] font-semibold mt-1.5 ${
-                  isActive ? "text-brand" : isDone ? "text-mint" : "text-slate-400"
-                }`}
-              >
-                {label}
-              </span>
-            </div>
-            {i < STEPS.length - 1 && (
-              <div className={`flex-1 h-px mx-3 ${stepNum < currentStep ? "bg-mint" : "bg-slate-200"}`} />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
-}
-
-function DoctorCard({ name, dept, photo, selected, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors ${
-        selected ? "border-brand bg-brand-light" : "border-slate-200 bg-white hover:border-slate-300"
-      }`}
-    >
-      <img src={photo} alt={name} className="w-10 h-10 rounded-full object-cover shrink-0" />
-      <div>
-        <p className="font-bold text-ink text-[13.5px]">{name}</p>
-        <p className={`text-[12px] ${selected ? "text-brand font-semibold" : "text-slate-500"}`}>
-          {selected ? "Selected" : dept}
-        </p>
-      </div>
-    </button>
-  );
-}
+import { ShieldCheck, HelpCircle, Check, CalendarCheck2 } from "lucide-react";
+import BookAppointmentStepIndicator from "../components/functions/BookAppointmentStepIndicator.jsx";
+import BookAppointmentDoctorCard from "../components/functions/BookAppointmentDoctorCard.jsx";
+import BookAppointmentDateCard from "../components/functions/BookAppointmentDateCard.jsx";
+import BookAppointmentTimeSlot from "../components/functions/BookAppointmentTimeSlot.jsx";
+import { getUpcomingDates } from "../utils/dateHelpers";
+import {
+  bookingSteps as STEPS,
+  bookingDepartments as DEPARTMENTS,
+  bookingDoctors as DOCTORS,
+  bookingTimeSlots as TIME_SLOTS,
+} from "../data/allData";
 
 export default function BookAppointment() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -87,7 +30,7 @@ export default function BookAppointment() {
         Select your preferred doctor and time slot to schedule a consultation.
       </p>
 
-      <StepIndicator currentStep={currentStep} />
+      <BookAppointmentStepIndicator currentStep={currentStep} />
 
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         {currentStep === 1 && (
@@ -107,29 +50,19 @@ export default function BookAppointment() {
               </div>
               <div>
                 <label className="block text-[12px] font-bold text-slate-600 mb-2">Select Doctor</label>
-                <select
-                  value={selectedDoctorId}
-                  onChange={(e) => setSelectedDoctorId(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-[13.5px] outline-none focus:border-brand"
-                >
+                <div className="grid gap-3">
                   {DOCTORS.map((doc) => (
-                    <option key={doc.id} value={doc.id}>{doc.fullTitle}</option>
+                    <BookAppointmentDoctorCard
+                      key={doc.id}
+                      name={doc.name}
+                      dept={doc.dept}
+                      photo={doc.photo}
+                      selected={doc.id === selectedDoctorId}
+                      onClick={() => setSelectedDoctorId(doc.id)}
+                    />
                   ))}
-                </select>
+                </div>
               </div>
-            </div>
-
-            <div className="grid sm:grid-cols-3 gap-3 mb-6">
-              {DOCTORS.map((doc) => (
-                <DoctorCard
-                  key={doc.id}
-                  name={doc.name}
-                  dept={doc.dept}
-                  photo={doc.photo}
-                  selected={doc.id === selectedDoctorId}
-                  onClick={() => setSelectedDoctorId(doc.id)}
-                />
-              ))}
             </div>
 
             <div className="flex justify-end">
@@ -145,13 +78,13 @@ export default function BookAppointment() {
 
         {currentStep === 2 && (
           <p className="text-slate-500 text-[13.5px] text-center py-10">
-            Schedule step yahan aayega — jab aap iski Figma screen bhejenge.
+            Schedule step placeholder — actual schedule UI will be added later.
           </p>
         )}
 
         {currentStep === 3 && (
           <p className="text-slate-500 text-[13.5px] text-center py-10">
-            Details step yahan aayega — jab aap iski Figma screen bhejenge.
+            Details step placeholder — details UI will be added later.
           </p>
         )}
       </div>

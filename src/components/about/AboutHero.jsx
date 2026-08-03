@@ -1,11 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
-const STATS = [
-  { value: "2018", label: "The First Blueprint", bg: "bg-slate-100" },
-  { value: "200+", label: "Expert Innovators", bg: "bg-mint-light" },
-  { value: "12", label: "Countries Served", bg: "bg-brand-light" },
-];
+import { storyStats as STORY_STATS } from "../../data/allData.js";
 
 export default function AboutHero() {
   return (
@@ -23,15 +18,15 @@ export default function AboutHero() {
           focus on what matters most: the patient.
         </p>
         <div className="flex items-center justify-center gap-4">
-          
+
           <Link
             to="/login?tab=create"
             className="bg-brand hover:bg-brand-dark text-white font-semibold text-[14px] px-6 py-3 rounded-lg transition-colors"
           >
             Join Our Journey
           </Link>
-          
-         
+
+
           <a
             href="#impact"
             className="border border-brand text-brand font-semibold text-[14px] px-6 py-3 rounded-lg hover:bg-brand-light transition-colors"
@@ -65,14 +60,14 @@ export default function AboutHero() {
           </div>
 
           <img
-  src="https://picsum.photos/seed/medflow-office/700/500"
-  alt="MedFlow office"
-  className="rounded-xl w-full h-full min-h-[220px] object-cover"
-/>
+            src="https://picsum.photos/seed/medflow-office/700/500"
+            alt="MedFlow office"
+            className="rounded-xl w-full h-full min-h-[220px] object-cover"
+          />
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
-          {STATS.map((s) => (
+          {STORY_STATS.map((s) => (
             <div key={s.label} className={`${s.bg} rounded-xl p-6 text-center`}>
               <p className="font-display font-extrabold text-ink text-[24px] mb-1">{s.value}</p>
               <p className="text-slate-600 text-[13px]">{s.label}</p>

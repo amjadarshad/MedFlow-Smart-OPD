@@ -3,81 +3,9 @@ import {
   Users, AlertTriangle, Timer, ChevronDown, BarChart3, FileText,
   Sparkles, Heart, ShieldAlert, ClipboardCheck,
 } from "lucide-react";
-
-const KPIS = [
-  { label: "Patients Seen Today", value: "24", note: "+3 since 1h", noteColor: "text-emerald-600", icon: Users, tint: "text-mint", tintBg: "bg-mint-light" },
-  { label: "Pending Reviews", value: "08", note: "Urgent", noteColor: "text-red-500", icon: AlertTriangle, tint: "text-red-500", tintBg: "bg-red-50" },
-  { label: "Avg. Wait Time", value: "12", suffix: "minutes", icon: Timer, tint: "text-brand", tintBg: "bg-brand-light" },
-];
-
-const APPOINTMENTS = [
-  { token: "TK 14", name: "Sarah Jenkins", detail: "Check-up · 10:30 AM", status: "Checked In", action: "Call Next", actionStyle: "filled" },
-  { token: "TK 15", name: "Mark Wilson", detail: "Follow-up · 10:45 AM", status: "Scheduled", action: "Pre-Audit", actionStyle: "outline" },
-];
-
-const VITALS = [
-  { label: "BP", height: 55 },
-  { label: "PL", height: 75 },
-  { label: "OX", height: 35 },
-  { label: "TP", height: 90 },
-  { label: "WT", height: 60 },
-];
-
-const RX_TEMPLATES = ["Fever Cluster", "Post-Op Recovery", "Standard Labs"];
-
-const CLINICAL_HISTORY = [
-  { dot: "bg-red-500", title: "Hypertension Type II", detail: "Diagnosed 2021 · Managed via Amlodipine" },
-  { dot: "bg-emerald-500", title: "Allergy: Penicillin", detail: "Severe reaction noted in 2018" },
-];
-
-function KPICard({ label, value, suffix, note, noteColor, icon: Icon, tint, tintBg }) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <div className={`w-8 h-8 rounded-lg ${tintBg} flex items-center justify-center`}>
-          <Icon size={15} className={tint} />
-        </div>
-        <p className="text-[10.5px] font-bold uppercase tracking-wide text-slate-500">{label}</p>
-      </div>
-      <div className="flex items-baseline gap-1.5">
-        <span className="font-display font-extrabold text-[22px] text-ink">{value}</span>
-        {suffix && <span className="text-[12.5px] text-slate-500">{suffix}</span>}
-        {note && <span className={`text-[12px] font-semibold ${noteColor}`}>{note}</span>}
-      </div>
-    </div>
-  );
-}
-
-function AppointmentRow({ token, name, detail, status, action, actionStyle }) {
-  return (
-    <div className="flex items-center gap-4 bg-white rounded-xl border border-slate-200 p-4">
-      <div className="w-12 h-12 rounded-lg bg-brand-light flex flex-col items-center justify-center shrink-0">
-        <span className="text-[9px] font-bold text-brand uppercase leading-none">{token.split(" ")[0]}</span>
-        <span className="text-[15px] font-extrabold text-brand leading-none mt-0.5">{token.split(" ")[1]}</span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-ink text-[14.5px]">{name}</p>
-        <p className="text-slate-500 text-[13px]">{detail}</p>
-      </div>
-      <span
-        className={`text-[11.5px] font-semibold px-3 py-1.5 rounded-full shrink-0 ${
-          status === "Checked In" ? "bg-mint-light text-emerald-700" : "bg-slate-100 text-slate-500"
-        }`}
-      >
-        {status}
-      </span>
-      <button
-        className={`text-[13px] font-semibold px-4 py-2 rounded-lg shrink-0 transition-colors ${
-          actionStyle === "filled"
-            ? "bg-brand hover:bg-brand-dark text-white"
-            : "border border-brand text-brand hover:bg-brand-light"
-        }`}
-      >
-        {action}
-      </button>
-    </div>
-  );
-}
+import DoctorAppointmentsKPICard from "../components/functions/DoctorAppointmentsKPICard.jsx";
+import AppointmentRow from "../components/functions/AppointmentRow.jsx";
+import { scheduleKpis as KPIS, todayAppointments as APPOINTMENTS, vitalsTrend as VITALS, rxTemplates as RX_TEMPLATES, clinicalHistory as CLINICAL_HISTORY } from "../data/allData";
 
 export default function DoctorAppointments() {
   const [activeTab, setActiveTab] = useState("physical"); // "physical" | "online"
@@ -91,7 +19,7 @@ export default function DoctorAppointments() {
         {/* KPI row */}
         <div className="grid sm:grid-cols-3 gap-4 mb-6">
           {KPIS.map((kpi) => (
-            <KPICard key={kpi.label} {...kpi} />
+            <DoctorAppointmentsKPICard key={kpi.label} {...kpi} />
           ))}
         </div>
 
@@ -126,7 +54,7 @@ export default function DoctorAppointments() {
             APPOINTMENTS.map((appt) => <AppointmentRow key={appt.token} {...appt} />)
           ) : (
             <p className="text-slate-500 text-[13.5px] bg-white rounded-xl border border-slate-200 p-6 text-center">
-              Abhi koi online consultation scheduled nahi hai.
+              No online consultations are scheduled at the moment.
             </p>
           )}
         </div>

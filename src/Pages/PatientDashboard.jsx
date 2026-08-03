@@ -1,35 +1,8 @@
 import React, { useState } from "react";
 import { CalendarCheck2, Ticket, MessageSquare, Star, Eye, SlidersHorizontal, Download, PlayCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const DOCTORS = [
- { name: "Dr. Lisa Chen", spec: "Dermatologist", exp: "12yrs exp", rating: 4.9, category: "Dermatology", photo: "https://i.pravatar.cc/150?img=32" },
-{ name: "Dr. Marcus Webb", spec: "Neurology", exp: "8yrs exp", rating: 4.7, category: "Neurology", photo: "https://i.pravatar.cc/150?img=13" },
-{ name: "Dr. Sofia Rossi", spec: "General Physician", exp: "15yrs exp", rating: 4.8, category: "Cardiology", photo: "https://i.pravatar.cc/150?img=45" },
-];
-
-const CATEGORIES = ["All", "Cardiology", "Neurology"];
-
-const PRESCRIPTIONS = [
-  { date: "12 Oct 2023", id: "#PX9012", doctor: "Dr. Lisa Chen", dept: "Dermatology", diagnosis: "Acute Dermatitis", status: "Completed" },
-  { date: "28 Sep 2023", id: "#PX8824", doctor: "Dr. Aris Thorne", dept: "Cardiology", diagnosis: "Blood Pressure Check", status: "Completed" },
-  { date: "15 Aug 2023", id: "#PX7741", doctor: "Dr. Marcus Webb", dept: "Neurology", diagnosis: "Migraine Review", status: "Archived" },
-];
-
-function DoctorCard({ name, spec, exp, rating, photo }) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
-<img src={photo} alt={name} className="w-11 h-11 rounded-full object-cover shrink-0" />      <div>
-        <p className="font-bold text-ink text-[14px]">{name}</p>
-        <p className="text-slate-500 text-[12.5px]">{spec} · {exp}</p>
-        <div className="flex items-center gap-1 mt-0.5">
-          <Star size={12} className="text-amber-400" fill="currentColor" />
-          <span className="text-[12px] font-semibold text-slate-600">{rating}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+import PatientDashboardDoctorCard from "../components/functions/PatientDashboardDoctorCard.jsx";
+import { availableDoctors as DOCTORS, doctorCategories as CATEGORIES, prescriptions as PRESCRIPTIONS } from "../data/allData";
 
 export default function PatientDashboard() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -134,10 +107,10 @@ export default function PatientDashboard() {
 
           <div className="flex flex-col gap-3">
             {filteredDoctors.map((doc) => (
-              <DoctorCard key={doc.name} {...doc} />
+              <PatientDashboardDoctorCard key={doc.name} {...doc} />
             ))}
             {filteredDoctors.length === 0 && (
-              <p className="text-slate-500 text-[13.5px] py-6 text-center">Is category mein koi doctor nahi mila.</p>
+              <p className="text-slate-500 text-[13.5px] py-6 text-center">No doctors found in this category.</p>
             )}
           </div>
         </div>

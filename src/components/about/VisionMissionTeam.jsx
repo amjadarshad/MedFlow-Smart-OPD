@@ -1,17 +1,5 @@
 import React from "react";
-
-const TEAM = [
-  { name: "Dr. Vikram Malhotra", role: "Chief Executive Officer", photo: "https://i.pravatar.cc/400?img=12" },
-  { name: "Sarah Chen", role: "Chief Technology Officer", photo: "https://i.pravatar.cc/400?img=47" },
-  { name: "Dr. Elena Rodriguez", role: "Chief Medical Officer", photo: "https://i.pravatar.cc/400?img=44" },
-  { name: "Jameson Burke", role: "Chief Operating Officer", photo: "https://i.pravatar.cc/400?img=53" },
-];
-
-const IMPACT_STATS = [
-  { value: "500+", label: "Partnered Clinics", note: "Across South Asia and Middle East" },
-  { value: "1M+", label: "Patient Interactions", note: "Monthly digital check-ins and consultations" },
-  { value: "45%", label: "Time Saved", note: "Average reduction in wait times" },
-];
+import { leadershipTeam as LEADERSHIP_TEAM, impactStats as IMPACT_STATS } from "../../data/allData.js";
 
 export default function VisionMissionTeam() {
   return (
@@ -44,7 +32,7 @@ export default function VisionMissionTeam() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-          {TEAM.map((member) => (
+          {LEADERSHIP_TEAM.map((member) => (
             <div key={member.name}>
               
 <img src={member.photo} alt={member.name} className="w-full aspect-[4/5] rounded-lg object-cover mb-3" />              <p className="font-bold text-ink text-[14.5px]">{member.name}</p>

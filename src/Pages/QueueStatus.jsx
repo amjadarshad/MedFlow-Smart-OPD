@@ -1,46 +1,7 @@
 import React, { useState } from "react";
 import { Timer, Users, ChevronRight, ChevronLeft, SlidersHorizontal, AlertTriangle, Radio, Gauge } from "lucide-react";
-
-const ROOMS = [
-  { room: "ROOM 101", doctor: "Dr. Sarah Jenkins", dept: "Cardiology", status: "occupied", tokenLabel: "Current TKN #402" },
-  { room: "ROOM 102", doctor: "Dr. Arjan Singh", dept: "Dermatology", status: "available", tokenLabel: "Last TKN #398" },
-  { room: "ROOM 204", doctor: "Dr. Michael Chen", dept: "Neurology", status: "occupied", tokenLabel: "Current TKN #405" },
-  { room: "ROOM 105", doctor: "Dr. Emily Watson", dept: "Pediatrics", status: "occupied", tokenLabel: "Current TKN #408" },
-];
-
-const QUEUE = [
-  { token: "#402", name: "Robert Williams", meta: "Male, 45y", initials: "RW", avatarBg: "bg-slate-400", doctor: "Dr. Sarah Jenkins", dept: "Cardiology", status: "checkup" },
-  { token: "#403", name: "Linda Meyer", meta: "Female, 29y", initials: "LM", avatarBg: "bg-brand", doctor: "Dr. Arjan Singh", dept: "Dermatology", status: "waiting", isNext: true },
-  { token: "#404", name: "James Hardey", meta: "Male, 62y", initials: "JH", avatarBg: "bg-mint", doctor: "Dr. Michael Chen", dept: "Neurology", status: "waiting" },
-  { token: "#405", name: "Anita Kaur", meta: "Female, 38y", initials: "AK", avatarBg: "bg-slate-400", doctor: "Dr. Michael Chen", dept: "Neurology", status: "checkup" },
-];
-
-const ALERTS = [
-  { icon: AlertTriangle, tint: "text-red-600", bg: "bg-red-50", title: "Emergency Case", detail: "Trauma Unit arriving in 5 mins" },
-  { icon: Radio, tint: "text-mint", bg: "bg-mint-light", title: "Coordination", detail: "3 doctors on break, 1 roving" },
-  { icon: Gauge, tint: "text-slate-600", bg: "bg-slate-100", title: "System Load", detail: "Optimal flow maintained (85%)" },
-];
-
-function RoomCard({ room, doctor, dept, status, tokenLabel }) {
-  const isOccupied = status === "occupied";
-  return (
-    <div className="border border-slate-200 rounded-lg p-3.5 hover:border-slate-300 transition-colors cursor-pointer">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-brand font-bold text-[12px]">{room}</span>
-        <span className={`flex items-center gap-1.5 text-[10.5px] font-bold uppercase ${isOccupied ? "text-slate-500" : "text-mint"}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${isOccupied ? "bg-slate-400" : "bg-mint"}`} />
-          {status}
-        </span>
-      </div>
-      <p className="font-bold text-ink text-[14px]">{doctor}</p>
-      <p className="text-slate-500 text-[12.5px] mb-2">{dept}</p>
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-        <span className="text-[11.5px] text-slate-500">{tokenLabel}</span>
-        <ChevronRight size={14} className="text-slate-400" />
-      </div>
-    </div>
-  );
-}
+import RoomCard from "../components/functions/RoomCard.jsx";
+import { activeRooms as ROOMS, patientQueue as QUEUE, queueAlerts as ALERTS } from "../data/allData";
 
 export default function QueueStatus() {
   const [activeTab, setActiveTab] = useState("active"); // "active" | "completed"
@@ -180,7 +141,7 @@ export default function QueueStatus() {
               {visibleQueue.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-5 py-10 text-center text-slate-400">
-                    Is tab mein koi patient nahi hai.
+                    No patients on this tab.
                   </td>
                 </tr>
               )}

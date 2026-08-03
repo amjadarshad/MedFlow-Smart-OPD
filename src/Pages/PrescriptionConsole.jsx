@@ -1,20 +1,10 @@
 import React, { useState } from "react";
 import { Printer, BookmarkPlus, CheckCircle2, ClipboardList, Pill, Plus, CalendarDays } from "lucide-react";
+import PrescriptionPatientCard from "../components/functions/PrescriptionPatientCard.jsx";
+import PrescriptionMedicineRow from "../components/functions/PrescriptionMedicineRow.jsx";
+import { rxPatient as PATIENT, frequencies as FREQUENCIES, initialMedicines } from "../data/allData";
 
-const PATIENT = {
-  name: "Robert Harrison",
-  id: "#PT-8829",
-  age: 64,
-  gender: "Male",
-  weight: "78 kg",
-  bp: "145/92",
-  pulse: "82 bpm",
-  temp: "98.4 F",
-};
-
-const FREQUENCIES = ["1-0-1 (BID)", "1-1-1 (TID)", "1-0-0 (OD)", "0-0-1 (Night)"];
-
-let nextId = 2; // naye medicine rows ke liye unique id counter
+let nextId = 2; // unique id counter for new medicine rows
 
 export default function PrescriptionConsole() {
   const [symptoms, setSymptoms] = useState(
@@ -24,9 +14,7 @@ export default function PrescriptionConsole() {
   const [advice, setAdvice] = useState("");
   const [followUpDate, setFollowUpDate] = useState("");
 
-  const [medicines, setMedicines] = useState([
-    { id: 1, drugName: "Paracetamol 500mg", dosage: "1 Tab", frequency: "1-0-1 (BID)" },
-  ]);
+  const [medicines, setMedicines] = useState(initialMedicines);
 
   function addDrugRow() {
     setMedicines((prev) => [
@@ -44,35 +32,7 @@ export default function PrescriptionConsole() {
   return (
     <div>
       {/* Patient header card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-200 to-pink-200 shrink-0" />
-          <div>
-            <p className="font-bold text-ink text-[17px]">{PATIENT.name}</p>
-            <p className="text-slate-500 text-[13px]">
-              ID: {PATIENT.id} · {PATIENT.age} Years · {PATIENT.gender}
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-8">
-          <div className="text-center">
-            <p className="text-[10px] font-bold uppercase text-slate-400">Weight</p>
-            <p className="font-bold text-ink text-[14px]">{PATIENT.weight}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] font-bold uppercase text-slate-400">BP</p>
-            <p className="font-bold text-red-500 text-[14px]">{PATIENT.bp}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] font-bold uppercase text-slate-400">Pulse</p>
-            <p className="font-bold text-ink text-[14px]">{PATIENT.pulse}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] font-bold uppercase text-slate-400">Temp</p>
-            <p className="font-bold text-ink text-[14px]">{PATIENT.temp}</p>
-          </div>
-        </div>
-      </div>
+      <PrescriptionPatientCard patient={PATIENT} />
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         {/* LEFT: Initial Assessment */}
@@ -150,29 +110,12 @@ export default function PrescriptionConsole() {
 
           <div className="flex flex-col gap-2">
             {medicines.map((med) => (
-              <div key={med.id} className="grid grid-cols-[1fr_90px_130px] gap-3">
-                <input
-                  value={med.drugName}
-                  onChange={(e) => updateMedicine(med.id, "drugName", e.target.value)}
-                  placeholder="Drug name"
-                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 text-[13px] outline-none focus:border-brand"
-                />
-                <input
-                  value={med.dosage}
-                  onChange={(e) => updateMedicine(med.id, "dosage", e.target.value)}
-                  placeholder="Dosage"
-                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 text-[13px] outline-none focus:border-brand"
-                />
-                <select
-                  value={med.frequency}
-                  onChange={(e) => updateMedicine(med.id, "frequency", e.target.value)}
-                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 text-[13px] outline-none focus:border-brand"
-                >
-                  {FREQUENCIES.map((f) => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
-                </select>
-              </div>
+              <PrescriptionMedicineRow
+                key={med.id}
+                med={med}
+                frequencies={FREQUENCIES}
+                onUpdate={updateMedicine}
+              />
             ))}
           </div>
         </div>

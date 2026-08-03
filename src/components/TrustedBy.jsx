@@ -1,13 +1,6 @@
 import React from "react";
 import { CrossIcon, Briefcase, HeartPulse, Microscope, Asterisk } from "lucide-react";
-
-const BRANDS = [
-  { icon: CrossIcon, name: "Hospital One", color: "text-brand" },
-  { icon: Briefcase, name: "Clinic Plus", color: "text-mint" },
-  { icon: HeartPulse, name: "Heart Care", color: "text-slate-500" },
-  { icon: Microscope, name: "Med Labs", color: "text-brand" },
-  { icon: Asterisk, name: "First Aid", color: "text-mint" },
-];
+import { trustedBrands as BRANDS } from "../data/allData.js";
 
 export default function TrustedBy() {
   return (

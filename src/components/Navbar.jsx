@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-
-const NAV_LINKS = ["Features", "Solutions", "About"];
+import { navLinks } from "../data/allData.js";
 
 export default function Navbar() {
   return (
@@ -12,9 +11,16 @@ export default function Navbar() {
         </a>
 
        <nav className="hidden md:flex items-center gap-9">
-  <Link to="/" className="text-[15px] text-slate-600 hover:text-ink transition-colors">Home</Link>
-  <Link to="/about" className="text-[15px] text-slate-600 hover:text-ink transition-colors">About</Link>
-</nav>
+         {navLinks.map(({ label, path }) => (
+           <Link
+             key={label}
+             to={path}
+             className="text-[15px] text-slate-600 hover:text-ink transition-colors"
+           >
+             {label}
+           </Link>
+         ))}
+       </nav>
 
         <div className="flex items-center gap-6">
           <Link to="/login" className="text-[15px] font-medium text-brand hover:text-brand-dark">
