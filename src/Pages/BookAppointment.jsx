@@ -10,7 +10,7 @@ import {
   bookingDepartments as DEPARTMENTS,
   bookingDoctors as DOCTORS,
   bookingTimeSlots as TIME_SLOTS,
-} from "../data/allData";
+} from "../data/allData.js";
 
 export default function BookAppointment() {
   const [currentStep, setCurrentStep] = useState(1);

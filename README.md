@@ -1,49 +1,45 @@
-# MedFlow Smart OPD — Frontend
+## Routes
 
-React + Vite + Tailwind CSS project, based on the Figma design.
-
-## Running locally
-
-1. Open this folder in VS Code (`File > Open Folder`).
-2. Open the integrated terminal (Ctrl+`) and install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the dev server:
-   ```bash
-   npm run dev
-   ```
-4. Open the local URL shown in the terminal (usually `http://localhost:5173`).
-
-## Folder structure
-
-```
-medflow-opd/
-├── index.html
-├── package.json
-├── tailwind.config.js
-├── postcss.config.js
-├── vite.config.js
-└── src/
-    ├── main.jsx
-    ├── App.jsx
-    ├── index.css
-    └── components/
-        ├── Navbar.jsx
-        └── Hero.jsx
-```
+| Path | Page | Notes |
+|---|---|---|
+| `/` | LandingPage | Public homepage |
+| `/login` | LoginPage | Role tabs (Patient/Doctor/Admin) pre-select via `?tab=` query param |
+| `/about` | AboutUs | Public |
+| `/dashboard` | PatientDashboard | Nested under `DashboardLayout` (Sidebar + Topbar) |
+| `/dashboard/appointments` | DoctorAppointments | |
+| `/dashboard/admin` | AdminDashboard | |
+| `/dashboard/book-appointment` | BookAppointment | Multi-step wizard |
+| `/dashboard/prescription` | PrescriptionConsole | |
+| `/dashboard/queue` | QueueStatus | |
+| `/dashboard/telemedicine` | Telemedicine | |
+| `/dashboard/billing` | Billing | |
+| `/dashboard/records` | MedicalRecords | |
 
 ## Current status
 
-- `Navbar.jsx` — top nav bar (logo, Features/Solutions/About, Login, Join Now)
-- `Hero.jsx` — hero section (heading, CTA buttons, floating "Next Call" and "Queue Status" cards)
+All pages listed above are built and wired with real navigation (React Router, `useNavigate`,
+role-based redirect on login). Dashboard `Sidebar` and `Topbar` are fully functional -- quick
+search (pages + doctors), notifications dropdown, and logout are wired.
 
-## Adding doctor/clinic photos
+**Still pending / not yet built:**
+- Backend/API integration -- everything currently reads from static mock data in `src/data/allData.js`
+- Medical Records page's own local "Filter by date, type, or doctor" search input is UI-only (separate from the Topbar's global search, which *is* wired)
+- Auth/session handling -- "Logout" currently just navigates to `/login`, there's no real session state yet
 
-Place your image in `src/assets/` and import it at the top of `Hero.jsx`. Replace the
-placeholder `<div>` with an `<img src={...} className="rounded-xl2 shadow-2xl w-full rotate-2" />`.
+## Conventions used in this project
 
-## Next steps
+- **All mock data lives in `src/data/allData.js`**, grouped by section comments, camelCase naming.
+- **Reusable UI pieces go in `src/components/functions/`** (must return JSX -- actual components).
+- **Standalone logic (non-JSX helper functions) goes in `src/utils/`** -- e.g. date calculations.
+- When editing a file in VS Code, prefer replacing the whole file (`Ctrl+A` -> paste) over appending,
+  to avoid accidental duplicate declarations.
+- Always run `npm run build` before considering a change done, to catch import/typo errors early.
 
-When additional Figma screens (Features, Solutions, About, Login, Dashboard, etc.) are available,
-add matching components under `src/components/` and include them in `App.jsx`.
+## Adding new pages/screens
+
+1. Design the screen in Figma.
+2. Create the page file under `src/pages/`.
+3. Add any new mock data to `src/data/allData.js` (with a comment explaining what it's for).
+4. Break out repeated UI into `src/components/functions/`.
+5. Register the route in `src/App.jsx`.
+6. Run `npm run build` to confirm everything compiles.

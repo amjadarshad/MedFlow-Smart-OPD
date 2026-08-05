@@ -1,8 +1,9 @@
 import React from "react";
+import { X } from "lucide-react";
 
-export default function PrescriptionMedicineRow({ med, frequencies, onUpdate }) {
+export default function PrescriptionMedicineRow({ med, frequencies, onUpdate, onRemove }) {
   return (
-    <div className="grid grid-cols-[1fr_90px_130px] gap-3">
+    <div className="grid grid-cols-[1fr_90px_130px_28px] gap-3 items-center">
       <input
         value={med.drugName}
         onChange={(e) => onUpdate(med.id, "drugName", e.target.value)}
@@ -26,6 +27,13 @@ export default function PrescriptionMedicineRow({ med, frequencies, onUpdate }) 
           </option>
         ))}
       </select>
+      <button
+        onClick={() => onRemove(med.id)}
+        className="w-7 h-7 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
+        title="Remove drug"
+      >
+        <X size={15} />
+      </button>
     </div>
   );
 }

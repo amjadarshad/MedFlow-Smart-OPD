@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronRight } from "lucide-react";
 
-export default function AppointmentRow({ token, name, detail, status, action, actionStyle }) {
+export default function AppointmentRow({ token, name, detail, status, action, actionStyle, onAction }) {
   return (
     <div className="flex items-center gap-4 bg-white rounded-xl border border-slate-200 p-4">
       <div className="w-12 h-12 rounded-lg bg-brand-light flex flex-col items-center justify-center shrink-0">
@@ -20,6 +20,7 @@ export default function AppointmentRow({ token, name, detail, status, action, ac
         {status}
       </span>
       <button
+        onClick={onAction}
         className={`text-[13px] font-semibold px-4 py-2 rounded-lg shrink-0 transition-colors ${
           actionStyle === "filled"
             ? "bg-brand hover:bg-brand-dark text-white"

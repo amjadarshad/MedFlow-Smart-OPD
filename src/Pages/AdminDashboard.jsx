@@ -1,7 +1,7 @@
 import React from "react";
 import { Download, PlusCircle, Users, UserPlus, Wallet, CalendarClock, Ticket, Link2, AlertTriangle,} from "lucide-react";
 import AdminKPICard from "../components/functions/AdminKPICard.jsx";
-import { adminKpis as KPIS, approvals as APPROVALS, queueRooms as QUEUE_ROOMS } from "../data/allData";
+import { adminKpis as KPIS, approvals as APPROVALS, queueRooms as QUEUE_ROOMS } from "../data/allData.js";
 
 export default function AdminDashboard() {
   return (

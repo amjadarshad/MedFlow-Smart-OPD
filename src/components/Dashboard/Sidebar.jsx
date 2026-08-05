@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { PlusCircle, HelpCircle, LogOut } from "lucide-react";
-import { dashboardNavItems } from "../../data/allConsts";
+import { dashboardNavItems } from "../../data/allConsts.js";
 
 export default function Sidebar() {
   const navigate = useNavigate();

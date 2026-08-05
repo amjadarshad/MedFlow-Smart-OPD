@@ -1,14 +1,42 @@
 import React, { useState } from "react";
 import { Timer, Users, ChevronRight, ChevronLeft, SlidersHorizontal, AlertTriangle, Radio, Gauge } from "lucide-react";
 import RoomCard from "../components/functions/RoomCard.jsx";
-import { activeRooms as ROOMS, patientQueue as QUEUE, queueAlerts as ALERTS } from "../data/allData";
+import { activeRooms as ROOMS, patientQueue as INITIAL_QUEUE, queueAlerts as ALERTS } from "../data/allData";
 
 export default function QueueStatus() {
   const [activeTab, setActiveTab] = useState("active"); // "active" | "completed"
+  const [queue, setQueue] = useState(INITIAL_QUEUE);
+  const [departmentFilter, setDepartmentFilter] = useState("All Departments");
+  const [isAdvancedFilterOpen, setIsAdvancedFilterOpen] = useState(false);
+  const [sortNewestFirst, setSortNewestFirst] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const visibleQueue = activeTab === "active"
-    ? QUEUE.filter((p) => p.status !== "done")
-    : QUEUE.filter((p) => p.status === "done");
+  let visibleQueue = activeTab === "active"
+    ? queue.filter((p) => p.status !== "done")
+    : queue.filter((p) => p.status === "done");
+
+  if (departmentFilter !== "All Departments") {
+    visibleQueue = visibleQueue.filter((p) => p.dept === departmentFilter);
+  }
+
+  if (sortNewestFirst) {
+    visibleQueue = [...visibleQueue].reverse();
+  }
+
+  function handleCallPatient(token) {
+    setQueue((prev) => {
+      // Move the called patient into checkup, then hand "next in line" to the following waiting patient
+      const updated = prev.map((p) =>
+        p.token === token ? { ...p, status: "checkup", isNext: false } : p
+      );
+      const stillWaiting = updated.filter((p) => p.status === "waiting");
+      if (stillWaiting.length > 0) {
+        const nextToken = stillWaiting[0].token;
+        return updated.map((p) => ({ ...p, isNext: p.token === nextToken }));
+      }
+      return updated;
+    });
+  }
 
   return (
     <div>
@@ -54,6 +82,7 @@ export default function QueueStatus() {
 
         {/* RIGHT: Patient Queue */}
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden h-fit">
+          {isAdvancedFilterOpen && <div className="fixed inset-0 z-10" onClick={() => setIsAdvancedFilterOpen(false)} />}
           <div className="flex flex-wrap items-center justify-between gap-3 p-5 pb-4">
             <div className="flex items-center gap-4">
               <p className="font-bold text-ink text-[15px]">Patient Queue</p>
@@ -76,17 +105,39 @@ export default function QueueStatus() {
                 </button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <select className="border border-slate-200 rounded-lg px-3 py-1.5 text-[12.5px] text-slate-600 outline-none">
+            <div className="flex items-center gap-2 relative z-20">
+              <select
+                value={departmentFilter}
+                onChange={(e) => setDepartmentFilter(e.target.value)}
+                className="border border-slate-200 rounded-lg px-3 py-1.5 text-[12.5px] text-slate-600 outline-none"
+              >
                 <option>All Departments</option>
                 <option>Cardiology</option>
                 <option>Neurology</option>
                 <option>Dermatology</option>
                 <option>Pediatrics</option>
               </select>
-              <button className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50">
+              <button
+                onClick={() => setIsAdvancedFilterOpen((prev) => !prev)}
+                className={`w-8 h-8 rounded-lg border flex items-center justify-center hover:bg-slate-50 ${
+                  isAdvancedFilterOpen ? "border-brand text-brand bg-brand-light" : "border-slate-200 text-slate-500"
+                }`}
+              >
                 <SlidersHorizontal size={14} />
               </button>
+              {isAdvancedFilterOpen && (
+                <div className="absolute top-full right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-lg shadow-lg p-3">
+                  <p className="text-[11px] font-bold uppercase text-slate-400 mb-2">Sort Order</p>
+                  <label className="flex items-center gap-2 text-[13px] text-slate-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={sortNewestFirst}
+                      onChange={(e) => setSortNewestFirst(e.target.checked)}
+                    />
+                    Newest token first
+                  </label>
+                </div>
+              )}
             </div>
           </div>
 
@@ -131,7 +182,10 @@ export default function QueueStatus() {
                   </td>
                   <td className="px-5 py-4">
                     {p.isNext && (
-                      <button className="bg-brand hover:bg-brand-dark text-white text-[12.5px] font-semibold px-4 py-2 rounded-lg transition-colors">
+                      <button
+                        onClick={() => handleCallPatient(p.token)}
+                        className="bg-brand hover:bg-brand-dark text-white text-[12.5px] font-semibold px-4 py-2 rounded-lg transition-colors"
+                      >
                         Call Patient
                       </button>
                     )}
@@ -151,10 +205,17 @@ export default function QueueStatus() {
           <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100">
             <span className="text-[12.5px] text-slate-500">Showing {visibleQueue.length} of 28 patients in queue</span>
             <div className="flex gap-1.5">
-              <button className="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 <ChevronLeft size={14} />
               </button>
-              <button className="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50">
+              <button
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="w-7 h-7 rounded-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50"
+              >
                 <ChevronRight size={14} />
               </button>
             </div>

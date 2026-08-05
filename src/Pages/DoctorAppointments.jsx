@@ -1,14 +1,32 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Users, AlertTriangle, Timer, ChevronDown, BarChart3, FileText,
   Sparkles, Heart, ShieldAlert, ClipboardCheck,
 } from "lucide-react";
 import DoctorAppointmentsKPICard from "../components/functions/DoctorAppointmentsKPICard.jsx";
 import AppointmentRow from "../components/functions/AppointmentRow.jsx";
-import { scheduleKpis as KPIS, todayAppointments as APPOINTMENTS, vitalsTrend as VITALS, rxTemplates as RX_TEMPLATES, clinicalHistory as CLINICAL_HISTORY } from "../data/allData";
+import { scheduleKpis as KPIS, todayAppointments as TODAY_APPOINTMENTS, vitalsTrend as VITALS, rxTemplates as RX_TEMPLATES, clinicalHistory as CLINICAL_HISTORY } from "../data/allData";
+
+const TOKEN_FILTERS = ["All Tokens", "Checked In", "Scheduled"];
 
 export default function DoctorAppointments() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("physical"); // "physical" | "online"
+  const [tokenFilter, setTokenFilter] = useState("All Tokens");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [appointments, setAppointments] = useState(TODAY_APPOINTMENTS);
+
+  const filteredAppointments =
+    tokenFilter === "All Tokens" ? appointments : appointments.filter((a) => a.status === tokenFilter);
+
+  function handleAppointmentAction(token) {
+    setAppointments((prev) =>
+      prev.map((a) =>
+        a.token === token ? { ...a, action: "In Progress", actionStyle: "outline" } : a
+      )
+    );
+  }
 
   return (
     <div className="grid xl:grid-cols-[1fr_340px] gap-6">
@@ -24,6 +42,7 @@ export default function DoctorAppointments() {
         </div>
 
         {/* Tabs + filter */}
+        {isFilterOpen && <div className="fixed inset-0 z-10" onClick={() => setIsFilterOpen(false)} />}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-6 border-b border-slate-200 -mb-px">
             <button
@@ -43,15 +62,46 @@ export default function DoctorAppointments() {
               Online Consultations
             </button>
           </div>
-          <button className="flex items-center gap-1.5 text-[13px] text-slate-600 border border-slate-200 rounded-lg px-3 py-1.5 bg-white">
-            Filter: All Tokens <ChevronDown size={14} />
-          </button>
+          <div className="relative z-20">
+            <button
+              onClick={() => setIsFilterOpen((prev) => !prev)}
+              className="flex items-center gap-1.5 text-[13px] text-slate-600 border border-slate-200 rounded-lg px-3 py-1.5 bg-white"
+            >
+              Filter: {tokenFilter} <ChevronDown size={14} />
+            </button>
+            {isFilterOpen && (
+              <div className="absolute top-full right-0 mt-1.5 w-40 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+                {TOKEN_FILTERS.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => {
+                      setTokenFilter(opt);
+                      setIsFilterOpen(false);
+                    }}
+                    className={`w-full px-3.5 py-2 text-[13px] text-left hover:bg-slate-50 ${
+                      tokenFilter === opt ? "text-brand font-semibold" : "text-slate-600"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Appointment list — physical vs online swap content */}
         <div className="flex flex-col gap-3 mb-6">
           {activeTab === "physical" ? (
-            APPOINTMENTS.map((appt) => <AppointmentRow key={appt.token} {...appt} />)
+            filteredAppointments.length > 0 ? (
+              filteredAppointments.map((appt) => (
+                <AppointmentRow key={appt.token} {...appt} onAction={() => handleAppointmentAction(appt.token)} />
+              ))
+            ) : (
+              <p className="text-slate-500 text-[13.5px] bg-white rounded-xl border border-slate-200 p-6 text-center">
+                No appointments match this filter.
+              </p>
+            )
           ) : (
             <p className="text-slate-500 text-[13.5px] bg-white rounded-xl border border-slate-200 p-6 text-center">
               No online consultations are scheduled at the moment.
@@ -90,15 +140,19 @@ export default function DoctorAppointments() {
               {RX_TEMPLATES.map((t) => (
                 <button
                   key={t}
+                  onClick={() => navigate("/dashboard/prescription")}
                   className="text-left text-[13px] text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-lg px-3 py-2 transition-colors"
                 >
                   {t}
                 </button>
               ))}
             </div>
-            <a href="#manage" className="text-brand text-[13px] font-semibold hover:underline">
+            <button
+              onClick={() => navigate("/dashboard/prescription")}
+              className="text-brand text-[13px] font-semibold hover:underline"
+            >
               Manage Templates →
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -108,14 +162,14 @@ export default function DoctorAppointments() {
         <p className="font-bold text-ink text-[15px] mb-5">Patient Insight</p>
 
         <div className="flex flex-col items-center text-center mb-5">
-  <img
-    src="https://i.pravatar.cc/150?img=45"
-    alt="Sarah Jenkins"
-    className="w-16 h-16 rounded-full object-cover mb-3"
-  />
-  <p className="font-bold text-ink text-[15px]">Sarah Jenkins</p>
-  <p className="text-slate-500 text-[12.5px]">34, Female · PID: #99420</p>
-</div>
+          <img
+            src="https://i.pravatar.cc/150?img=45"
+            alt="Sarah Jenkins"
+            className="w-16 h-16 rounded-full object-cover mb-3"
+          />
+          <p className="font-bold text-ink text-[15px]">Sarah Jenkins</p>
+          <p className="text-slate-500 text-[12.5px]">34, Female · PID: #99420</p>
+        </div>
 
         <div className="bg-amber-50 rounded-lg p-3.5 mb-5">
           <div className="flex items-center gap-1.5 mb-1.5">
@@ -154,15 +208,24 @@ export default function DoctorAppointments() {
           </div>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-[13.5px] py-3 rounded-lg mb-3 transition-colors">
+        <button
+          onClick={() => navigate("/dashboard/records")}
+          className="w-full flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-[13.5px] py-3 rounded-lg mb-3 transition-colors"
+        >
           <ClipboardCheck size={16} />
           Open Full Medical Record
         </button>
         <div className="grid grid-cols-2 gap-3">
-          <button className="border border-slate-200 hover:bg-slate-50 text-ink font-medium text-[13px] py-2.5 rounded-lg transition-colors">
+          <button
+            onClick={() => navigate("/dashboard/records")}
+            className="border border-slate-200 hover:bg-slate-50 text-ink font-medium text-[13px] py-2.5 rounded-lg transition-colors"
+          >
             Lab Orders
           </button>
-          <button className="border border-slate-200 hover:bg-slate-50 text-ink font-medium text-[13px] py-2.5 rounded-lg transition-colors">
+          <button
+            onClick={() => navigate("/dashboard/book-appointment")}
+            className="border border-slate-200 hover:bg-slate-50 text-ink font-medium text-[13px] py-2.5 rounded-lg transition-colors"
+          >
             Referral
           </button>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { CalendarCheck2, Ticket, MessageSquare, Star, Eye, SlidersHorizontal, Download, PlayCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import PatientDashboardDoctorCard from "../components/functions/PatientDashboardDoctorCard.jsx";
-import { availableDoctors as DOCTORS, doctorCategories as CATEGORIES, prescriptions as PRESCRIPTIONS } from "../data/allData";
+import { availableDoctors as DOCTORS, doctorCategories as CATEGORIES, prescriptions as PRESCRIPTIONS } from "../data/allData.js";
 
 export default function PatientDashboard() {
   const [activeCategory, setActiveCategory] = useState("All");

@@ -17,12 +17,71 @@ import {
   invoiceStatusStyles as STATUS_STYLES,
 } from "../data/allData";
 
+const DATE_RANGE_OPTIONS = ["Last 7 Days", "Last 30 Days", "Last 90 Days", "All Time"];
+const METHOD_OPTIONS = ["All", "Credit Card", "Cash", "Insurance", "Others"];
+
 export default function Billing() {
+  const [invoicesList, setInvoicesList] = useState(INVOICES);
   const [statusFilter, setStatusFilter] = useState("All");
+  const [methodFilter, setMethodFilter] = useState("All");
+  const [dateRange, setDateRange] = useState("Last 30 Days");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredInvoices =
-    statusFilter === "All" ? INVOICES : INVOICES.filter((inv) => inv.status === statusFilter);
+  const [isDateOpen, setIsDateOpen] = useState(false);
+  const [isMethodOpen, setIsMethodOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [newInvoice, setNewInvoice] = useState({ patient: "", amount: "" });
+
+  const filteredInvoices = invoicesList.filter((inv) => {
+    const statusMatches = statusFilter === "All" || inv.status === statusFilter;
+    const methodMatches = methodFilter === "All" || inv.method === methodFilter;
+    return statusMatches && methodMatches;
+  });
+
+  function closeAllMenus() {
+    setIsDateOpen(false);
+    setIsMethodOpen(false);
+  }
+
+  function handleClearFilters() {
+    setStatusFilter("All");
+    setMethodFilter("All");
+  }
+
+  function handleMarkAsPaid(invoiceNo) {
+    setInvoicesList((prev) =>
+      prev.map((inv) => (inv.invoiceNo === invoiceNo ? { ...inv, status: "Paid" } : inv))
+    );
+  }
+
+  function handleCreateInvoice(e) {
+    e.preventDefault();
+    if (!newInvoice.patient.trim() || !newInvoice.amount.trim()) return;
+
+    const initials = newInvoice.patient
+      .trim()
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+
+    const invoice = {
+      initials,
+      avatarBg: "bg-brand",
+      patient: newInvoice.patient.trim(),
+      id: `P-${Math.floor(9000 + Math.random() * 999)}`,
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      invoiceNo: `#INV-2026-${String(invoicesList.length + 1).padStart(3, "0")}`,
+      amount: `$${Number(newInvoice.amount).toFixed(2)}`,
+      status: "Pending",
+      method: "Others",
+    };
+
+    setInvoicesList((prev) => [invoice, ...prev]);
+    setNewInvoice({ patient: "", amount: "" });
+    setIsCreateOpen(false);
+  }
 
   return (
     <div>
@@ -32,7 +91,10 @@ export default function Billing() {
           <h1 className="font-display font-extrabold text-[24px] text-ink mb-1">Billing &amp; Invoices</h1>
           <p className="text-slate-600 text-[14px]">Track revenue, manage patient payments, and generate invoices.</p>
         </div>
-        <button className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-[13.5px] px-5 py-2.5 rounded-lg transition-colors">
+        <button
+          onClick={() => setIsCreateOpen(true)}
+          className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-[13.5px] px-5 py-2.5 rounded-lg transition-colors"
+        >
           <PlusCircle size={16} />
           Create New Invoice
         </button>
@@ -55,13 +117,41 @@ export default function Billing() {
       </div>
 
       {/* Filters */}
+      {(isDateOpen || isMethodOpen) && <div className="fixed inset-0 z-10" onClick={closeAllMenus} />}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex flex-wrap items-center gap-3">
-          <button className="flex items-center gap-2 border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-600 bg-white">
-            <Calendar size={14} />
-            Last 30 Days
-            <ChevronDown size={13} />
-          </button>
+          <div className="relative z-20">
+            <button
+              onClick={() => {
+                setIsDateOpen((prev) => !prev);
+                setIsMethodOpen(false);
+              }}
+              className="flex items-center gap-2 border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-600 bg-white"
+            >
+              <Calendar size={14} />
+              {dateRange}
+              <ChevronDown size={13} />
+            </button>
+            {isDateOpen && (
+              <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+                {DATE_RANGE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => {
+                      setDateRange(opt);
+                      setIsDateOpen(false);
+                    }}
+                    className={`w-full px-3.5 py-2 text-[13px] text-left hover:bg-slate-50 ${
+                      dateRange === opt ? "text-brand font-semibold" : "text-slate-600"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="relative">
             <select
               value={statusFilter}
@@ -75,13 +165,40 @@ export default function Billing() {
             </select>
             <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
-          <button className="flex items-center gap-2 border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-600 bg-white">
-            Method: All
-            <ChevronDown size={13} />
-          </button>
+
+          <div className="relative z-20">
+            <button
+              onClick={() => {
+                setIsMethodOpen((prev) => !prev);
+                setIsDateOpen(false);
+              }}
+              className="flex items-center gap-2 border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-600 bg-white"
+            >
+              Method: {methodFilter}
+              <ChevronDown size={13} />
+            </button>
+            {isMethodOpen && (
+              <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+                {METHOD_OPTIONS.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => {
+                      setMethodFilter(opt);
+                      setIsMethodOpen(false);
+                    }}
+                    className={`w-full px-3.5 py-2 text-[13px] text-left hover:bg-slate-50 ${
+                      methodFilter === opt ? "text-brand font-semibold" : "text-slate-600"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <button
-          onClick={() => setStatusFilter("All")}
+          onClick={handleClearFilters}
           className="flex items-center gap-1.5 text-[13px] text-brand font-semibold hover:underline"
         >
           <X size={13} />
@@ -130,13 +247,22 @@ export default function Billing() {
                     <div className="flex items-center justify-end gap-3 text-slate-400">
                       {isOverdue && <AlertTriangle size={15} className="text-red-500" />}
                       {inv.status === "Pending" ? (
-                        <button className="bg-brand hover:bg-brand-dark text-white text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                        <button
+                          onClick={() => handleMarkAsPaid(inv.invoiceNo)}
+                          className="bg-brand hover:bg-brand-dark text-white text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors"
+                        >
                           Pay Now
                         </button>
                       ) : (
-                        <Printer size={15} className="hover:text-brand cursor-pointer" />
+                        <Printer
+                          size={15}
+                          className="hover:text-brand cursor-pointer"
+                          onClick={() => window.print()}
+                        />
                       )}
-                      <Mail size={15} className="hover:text-brand cursor-pointer" />
+                      <a href={`mailto:?subject=Invoice ${inv.invoiceNo}&body=Invoice for ${inv.patient}, amount ${inv.amount}`}>
+                        <Mail size={15} className="hover:text-brand cursor-pointer" />
+                      </a>
                       {inv.status === "Paid" && <Eye size={15} className="hover:text-brand cursor-pointer" />}
                       <MoreVertical size={15} className="hover:text-brand cursor-pointer" />
                     </div>
@@ -144,6 +270,13 @@ export default function Billing() {
                 </tr>
               );
             })}
+            {filteredInvoices.length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-5 py-8 text-center text-slate-400 text-[13px]">
+                  No invoices match the selected filters.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
@@ -229,6 +362,49 @@ export default function Billing() {
           </div>
         </div>
       </div>
+
+      {/* Create New Invoice modal */}
+      {isCreateOpen && (
+        <div className="fixed inset-0 z-30 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display font-extrabold text-[16px] text-ink">Create New Invoice</h2>
+              <button onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateInvoice} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-[12px] font-bold text-slate-600 mb-1.5">Patient Name</label>
+                <input
+                  value={newInvoice.patient}
+                  onChange={(e) => setNewInvoice((prev) => ({ ...prev, patient: e.target.value }))}
+                  placeholder="e.g. Ahmed Raza"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-[13.5px] outline-none focus:border-brand"
+                />
+              </div>
+              <div>
+                <label className="block text-[12px] font-bold text-slate-600 mb-1.5">Amount ($)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newInvoice.amount}
+                  onChange={(e) => setNewInvoice((prev) => ({ ...prev, amount: e.target.value }))}
+                  placeholder="e.g. 250"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-[13.5px] outline-none focus:border-brand"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-brand hover:bg-brand-dark text-white font-semibold text-[13.5px] py-2.5 rounded-lg transition-colors mt-1"
+              >
+                Create Invoice
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
