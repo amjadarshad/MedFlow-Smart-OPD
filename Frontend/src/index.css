@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  color: #0b1220;
+}
+
+.font-display {
+  font-family: "Sora", system-ui, sans-serif;
+}
