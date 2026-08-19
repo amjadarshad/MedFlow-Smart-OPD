@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function DoctorAppointmentsKPICard({ label, value, suffix, note, noteColor, icon: Icon, tint, tintBg }) {
   return (

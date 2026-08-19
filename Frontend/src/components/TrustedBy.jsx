@@ -1,6 +1,4 @@
-import React from "react";
-import { CrossIcon, Briefcase, HeartPulse, Microscope, Asterisk } from "lucide-react";
-import { trustedBrands as BRANDS } from "../data/allData.js";
+import { trustedBrands as brands } from "../data/landingData.js";
 
 export default function TrustedBy() {
   return (
@@ -11,7 +9,7 @@ export default function TrustedBy() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
-          {BRANDS.map(({ icon: Icon, name, color }) => (
+          {brands.map(({ icon: Icon, name, color }) => (
             <div key={name} className="flex items-center gap-2">
               <Icon size={20} className={color} strokeWidth={2} />
               <span className="font-display font-bold text-[16px] text-slate-600 tracking-tight">

@@ -1,6 +1,5 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { storyStats as STORY_STATS } from "../../data/allData.js";
+import { storyStats } from "../../data/aboutData.js";
 
 export default function AboutHero() {
   return (
@@ -62,12 +61,16 @@ export default function AboutHero() {
           <img
             src="https://picsum.photos/seed/medflow-office/700/500"
             alt="MedFlow office"
+            width="700"
+            height="500"
+            loading="lazy"
+            decoding="async"
             className="rounded-xl w-full h-full min-h-[220px] object-cover"
           />
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
-          {STORY_STATS.map((s) => (
+          {storyStats.map((s) => (
             <div key={s.label} className={`${s.bg} rounded-xl p-6 text-center`}>
               <p className="font-display font-extrabold text-ink text-[24px] mb-1">{s.value}</p>
               <p className="text-slate-600 text-[13px]">{s.label}</p>

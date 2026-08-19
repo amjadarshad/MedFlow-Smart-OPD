@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function AdminKPICard({ label, value, note, noteColor, icon: Icon }) {
   return (

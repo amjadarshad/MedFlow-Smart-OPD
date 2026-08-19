@@ -1,4 +1,3 @@
-import React from "react";
 import TimelineStep from "./TimelineStep.jsx";
 
 export default function JourneyColumn({ icon: Icon, heading, headingColor, dotColor, steps }) {

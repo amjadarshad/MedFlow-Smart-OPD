@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function LineChart({ seriesA, seriesB, labels }) {
   const width = 600;

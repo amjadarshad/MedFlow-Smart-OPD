@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function VitalCard({ label, value, unit, icon: Icon }) {
   return (

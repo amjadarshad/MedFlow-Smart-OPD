@@ -1,309 +1,330 @@
-import React, { useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarCheck2, Download, FileText, Paperclip, Pill, Search, Stethoscope, Upload, UserRound } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext.jsx";
+import { userRoles } from "../constants/authConstants.js";
+import { getDoctorAppointments } from "../services/appointmentService.js";
 import {
-  Search, Upload, Activity, Pencil, ShieldAlert, Syringe, CheckCircle2,
-  Clock, FileText, Image as ImageIcon, FileCheck2, X, Plus,
-} from "lucide-react";
-import MedicalRecordsTimelineEntry from "../components/functions/MedicalRecordsTimelineEntry.jsx";
-import { conditions as INITIAL_CONDITIONS, allergies as INITIAL_ALLERGIES, immunizations as IMMUNIZATIONS, visitTimeline as TIMELINE, labReports as INITIAL_LAB_REPORTS } from "../data/allData";
+  getAdminMedicalRecordPatients,
+  getAdminPatientMedicalRecord,
+  getMyMedicalRecord,
+  getPatientMedicalRecord,
+  downloadMedicalDocument,
+  uploadMedicalDocument,
+} from "../services/medicalRecordService.js";
+import { downloadPrescriptionPdf } from "../utils/prescriptionPdf.js";
+
+function formatDate(value) {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function statusClass(status) {
+  if (status === "completed") return "bg-emerald-50 text-emerald-700";
+  if (status === "confirmed") return "bg-blue-50 text-brand";
+  if (status === "rejected" || status === "cancelled") return "bg-red-50 text-red-600";
+  return "bg-amber-50 text-amber-700";
+}
 
 export default function MedicalRecords() {
-  const fileInputRef = useRef(null);
-
-  const [timelineFilter, setTimelineFilter] = useState("6months"); // "6months" | "all"
+  const { role } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [record, setRecord] = useState({
+    patient: null,
+    appointments: [],
+    prescriptions: [],
+    documents: [],
+  });
+  const [patients, setPatients] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [conditions, setConditions] = useState(INITIAL_CONDITIONS);
-  const [allergies, setAllergies] = useState(INITIAL_ALLERGIES);
-  const [labReports, setLabReports] = useState(INITIAL_LAB_REPORTS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [downloadingPrescriptionId, setDownloadingPrescriptionId] = useState("");
+  const [downloadingDocumentId, setDownloadingDocumentId] = useState("");
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const [isConditionModalOpen, setIsConditionModalOpen] = useState(false);
-  const [newCondition, setNewCondition] = useState({ name: "", detail: "" });
+  const patientId = searchParams.get("patientId") || "";
+  const canDownloadPrescriptions = [
+    userRoles.patient,
+    userRoles.doctor,
+    userRoles.admin,
+  ].includes(role);
 
-  const [isManagingAllergies, setIsManagingAllergies] = useState(false);
-  const [newAllergy, setNewAllergy] = useState("");
+  useEffect(() => {
+    let isActive = true;
 
-  // Timeline: filter by 6-months / all-history tab, then by the search box
-  const term = searchTerm.trim().toLowerCase();
-  const visibleTimeline = TIMELINE
-    .filter((entry) => (timelineFilter === "all" ? true : entry.recent))
-    .filter(
-      (entry) =>
-        !term ||
-        entry.title.toLowerCase().includes(term) ||
-        entry.by.toLowerCase().includes(term) ||
-        entry.date.toLowerCase().includes(term)
+    async function loadRecord() {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        if (role === userRoles.patient) {
+          const data = await getMyMedicalRecord();
+          if (isActive) setRecord(data);
+          return;
+        }
+
+        if (role === userRoles.admin) {
+          const patientData = await getAdminMedicalRecordPatients();
+          const availablePatients = patientData.patients || [];
+          if (!isActive) return;
+          setPatients(availablePatients);
+
+          const selectedPatientId = availablePatients.some(
+            (patient) => patient._id === patientId,
+          )
+            ? patientId
+            : availablePatients[0]?._id || "";
+
+          if (!selectedPatientId) {
+            setRecord({ patient: null, appointments: [], prescriptions: [], documents: [] });
+            return;
+          }
+
+          if (selectedPatientId !== patientId) {
+            setSearchParams({ patientId: selectedPatientId }, { replace: true });
+          }
+
+          const data = await getAdminPatientMedicalRecord(selectedPatientId);
+          if (isActive) setRecord(data);
+          return;
+        }
+
+        if (role !== userRoles.doctor) {
+          if (isActive) {
+            setRecord({ patient: null, appointments: [], prescriptions: [], documents: [] });
+            setErrorMessage("Select a patient through a doctor appointment to view a medical record.");
+          }
+          return;
+        }
+
+        const appointmentData = await getDoctorAppointments();
+        const patientMap = new Map();
+        (appointmentData.appointments || []).forEach((appointment) => {
+          if (appointment.patient?._id) {
+            patientMap.set(appointment.patient._id, appointment.patient);
+          }
+        });
+        const availablePatients = Array.from(patientMap.values());
+        if (!isActive) return;
+        setPatients(availablePatients);
+
+        const selectedPatientId = availablePatients.some(
+          (patient) => patient._id === patientId,
+        )
+          ? patientId
+          : availablePatients[0]?._id || "";
+
+        if (!selectedPatientId) {
+          setRecord({ patient: null, appointments: [], prescriptions: [], documents: [] });
+          return;
+        }
+
+        if (selectedPatientId !== patientId) {
+          setSearchParams({ patientId: selectedPatientId }, { replace: true });
+        }
+
+        const data = await getPatientMedicalRecord(selectedPatientId);
+        if (isActive) setRecord(data);
+      } catch (error) {
+        if (isActive) {
+          setErrorMessage(error.message || "Unable to load medical record.");
+        }
+      } finally {
+        if (isActive) setIsLoading(false);
+      }
+    }
+
+    loadRecord();
+    return () => {
+      isActive = false;
+    };
+  }, [patientId, reloadKey, role, setSearchParams]);
+
+  const filteredAppointments = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return record.appointments || [];
+
+    return (record.appointments || []).filter((appointment) =>
+      [
+        appointment.reason,
+        appointment.department?.name,
+        appointment.status,
+        appointment.doctor?.user?.name,
+      ].some((value) => value?.toLowerCase().includes(term)),
     );
+  }, [record.appointments, searchTerm]);
 
-  function handleUploadClick() {
-    fileInputRef.current?.click();
+  async function handlePrescriptionDownload(prescription) {
+    try {
+      setDownloadingPrescriptionId(prescription._id);
+      setErrorMessage("");
+      await downloadPrescriptionPdf(prescription);
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to download prescription.");
+    } finally {
+      setDownloadingPrescriptionId("");
+    }
   }
 
-  function handleFileSelected(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const isImage = file.type.startsWith("image/");
-    setLabReports((prev) => [
-      {
-        name: file.name,
-        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-        icon: isImage ? ImageIcon : FileText,
-        preview: isImage ? "bg-slate-700" : "bg-slate-100",
-      },
-      ...prev,
-    ]);
-    e.target.value = "";
+  async function handleDocumentUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file || !record.patient) return;
+
+    try {
+      setIsUploadingDocument(true);
+      setErrorMessage("");
+      setSuccessMessage("");
+      const selectedPatientId = role === userRoles.patient ? "" : record.patient._id;
+      const data = await uploadMedicalDocument(file, selectedPatientId);
+      setSuccessMessage(data.message);
+      setReloadKey((currentKey) => currentKey + 1);
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to upload medical document.");
+    } finally {
+      setIsUploadingDocument(false);
+      event.target.value = "";
+    }
   }
 
-  function handleAddCondition(e) {
-    e.preventDefault();
-    if (!newCondition.name.trim()) return;
-    setConditions((prev) => [
-      ...prev,
-      { name: newCondition.name.trim(), detail: newCondition.detail.trim() || "Added today", tag: "NEW", tagStyle: "bg-brand-light text-brand" },
-    ]);
-    setNewCondition({ name: "", detail: "" });
-    setIsConditionModalOpen(false);
+  async function handleDocumentDownload(document) {
+    try {
+      setDownloadingDocumentId(document._id);
+      setErrorMessage("");
+      await downloadMedicalDocument(document);
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to download medical document.");
+    } finally {
+      setDownloadingDocumentId("");
+    }
   }
 
-  function handleRemoveAllergy(label) {
-    setAllergies((prev) => prev.filter((a) => a.label !== label));
-  }
-
-  function handleAddAllergy(e) {
-    e.preventDefault();
-    if (!newAllergy.trim()) return;
-    setAllergies((prev) => [...prev, { label: newAllergy.trim(), style: "bg-slate-100 text-slate-600" }]);
-    setNewAllergy("");
+  if (isLoading) {
+    return <p className="py-12 text-center text-sm text-slate-500">Loading medical record...</p>;
   }
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display font-extrabold text-[24px] text-ink mb-1">Medical Records</h1>
-          <p className="text-slate-600 text-[13.5px]">Patient ID: #MF-882910 | Alex Johnson</p>
+          <h1 className="font-display text-2xl font-extrabold text-ink">Medical Records</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {record.patient
+              ? `${record.patient.name} - ${record.patient.email}`
+              : "No patient record selected"}
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3.5 py-2.5">
-            <Search size={14} className="text-slate-400" />
-            <input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Filter by date, type, or doctor..."
-              className="outline-none text-[13px] placeholder:text-slate-400 w-56"
-            />
-          </div>
-          <button
-            onClick={handleUploadClick}
-            className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-[13.5px] px-4 py-2.5 rounded-lg transition-colors"
-          >
-            <Upload size={15} />
-            Upload New
-          </button>
-          <input ref={fileInputRef} type="file" onChange={handleFileSelected} className="hidden" />
+        <div className="flex flex-wrap items-center gap-3">
+          {(role === userRoles.doctor || role === userRoles.admin) && patients.length > 0 && (
+            <select
+              value={record.patient?._id || patientId}
+              onChange={(event) => setSearchParams({ patientId: event.target.value })}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
+            >
+              {patients.map((patient) => (
+                <option key={patient._id} value={patient._id}>{patient.name}</option>
+              ))}
+            </select>
+          )}
+          {record.patient && (
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-3.5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark">
+              <Upload size={15} />
+              {isUploadingDocument ? "Uploading..." : "Upload document"}
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" disabled={isUploadingDocument} onChange={handleDocumentUpload} className="sr-only" />
+            </label>
+          )}
+          <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5">
+            <Search size={15} className="text-slate-400" />
+            <input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search visits..." className="w-48 bg-transparent text-sm outline-none" />
+          </label>
         </div>
-      </div>
+      </header>
 
-      <div className="grid xl:grid-cols-[300px_1fr] gap-6">
-        {/* LEFT column */}
-        <div className="flex flex-col gap-5">
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-1.5">
-                <Activity size={15} className="text-brand" />
-                <p className="font-bold text-ink text-[14px]">Conditions</p>
-              </div>
-              <button
-                onClick={() => setIsConditionModalOpen(true)}
-                className="flex items-center gap-1 text-brand text-[12px] font-semibold"
-              >
-                <Pencil size={11} /> Edit
-              </button>
-            </div>
-            <div className="flex flex-col gap-3">
-              {conditions.map((c) => (
-                <div key={c.name} className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-ink text-[13.5px]">{c.name}</p>
-                    <p className="text-slate-400 text-[11.5px]">{c.detail}</p>
-                  </div>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded ${c.tagStyle}`}>{c.tag}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+      {errorMessage && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</p>}
+      {successMessage && <p role="status" className="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{successMessage}</p>}
 
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-1.5">
-                <ShieldAlert size={15} className="text-red-500" />
-                <p className="font-bold text-ink text-[14px]">Allergies</p>
+      {!record.patient ? (
+        <div className="rounded-lg border border-slate-200 bg-white py-14 text-center">
+          <UserRound size={32} className="mx-auto mb-3 text-slate-300" />
+          <p className="font-semibold text-ink">No real patient record available</p>
+          <p className="mt-1 text-sm text-slate-500">A booked appointment will make the patient available here.</p>
+        </div>
+      ) : (
+        <>
+          <section aria-label="Record summary" className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border border-slate-200 bg-white p-4"><CalendarCheck2 size={18} className="mb-3 text-brand" /><p className="text-xs font-semibold text-slate-500">Appointments</p><p className="mt-1 text-2xl font-extrabold text-ink">{record.appointments?.length || 0}</p></div>
+            <div className="rounded-lg border border-slate-200 bg-white p-4"><Pill size={18} className="mb-3 text-emerald-600" /><p className="text-xs font-semibold text-slate-500">Prescriptions</p><p className="mt-1 text-2xl font-extrabold text-ink">{record.prescriptions?.length || 0}</p></div>
+            <div className="rounded-lg border border-slate-200 bg-white p-4"><Paperclip size={18} className="mb-3 text-blue-600" /><p className="text-xs font-semibold text-slate-500">Documents</p><p className="mt-1 text-2xl font-extrabold text-ink">{record.documents?.length || 0}</p></div>
+            <div className="rounded-lg border border-slate-200 bg-white p-4"><Stethoscope size={18} className="mb-3 text-amber-600" /><p className="text-xs font-semibold text-slate-500">Latest Visit</p><p className="mt-1 text-sm font-bold text-ink">{formatDate(record.appointments?.[0]?.appointmentDate)}</p></div>
+          </section>
+
+          <section className="mb-6 overflow-hidden rounded-lg border border-slate-200 bg-white" aria-labelledby="medical-documents-title">
+            <div className="border-b border-slate-100 px-5 py-4"><h2 id="medical-documents-title" className="font-bold text-ink">Medical Documents</h2><p className="text-xs text-slate-500">Secure PDFs and diagnostic images</p></div>
+            {!record.documents?.length ? (
+              <div className="px-5 py-9 text-center"><Paperclip size={25} className="mx-auto mb-2 text-slate-300" /><p className="text-sm text-slate-500">No medical document has been uploaded.</p></div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {record.documents.map((document) => (
+                  <article key={document._id} className="flex items-center gap-3 px-5 py-4">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-blue-50 text-blue-600"><FileText size={16} /></span>
+                    <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-ink">{document.label || document.originalName}</p><p className="truncate text-xs text-slate-500">{document.originalName} - {(document.size / 1024).toFixed(1)} KB - {formatDate(document.createdAt)}</p></div>
+                    <button type="button" title="Download medical document" aria-label={`Download ${document.originalName}`} disabled={downloadingDocumentId === document._id} onClick={() => handleDocumentDownload(document)} className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-brand disabled:opacity-50"><Download size={15} /></button>
+                  </article>
+                ))}
               </div>
-              <button
-                onClick={() => setIsManagingAllergies((prev) => !prev)}
-                className="text-brand text-[12px] font-semibold"
-              >
-                {isManagingAllergies ? "Done" : "Manage"}
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {allergies.map((a) => (
-                <span
-                  key={a.label}
-                  className={`flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1.5 rounded-full ${a.style}`}
-                >
-                  {a.label}
-                  {isManagingAllergies && (
-                    <button onClick={() => handleRemoveAllergy(a.label)} className="hover:opacity-70">
-                      <X size={12} />
-                    </button>
-                  )}
-                </span>
-              ))}
-            </div>
-            {isManagingAllergies && (
-              <form onSubmit={handleAddAllergy} className="flex gap-2">
-                <input
-                  value={newAllergy}
-                  onChange={(e) => setNewAllergy(e.target.value)}
-                  placeholder="Add allergy..."
-                  className="flex-1 border border-slate-200 rounded-lg px-2.5 py-1.5 text-[12.5px] outline-none focus:border-brand"
-                />
-                <button type="submit" className="bg-brand hover:bg-brand-dark text-white rounded-lg px-2.5">
-                  <Plus size={14} />
-                </button>
-              </form>
             )}
-          </div>
+          </section>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center gap-1.5 mb-4">
-              <Syringe size={15} className="text-brand" />
-              <p className="font-bold text-ink text-[14px]">Immunizations</p>
-            </div>
-            <div className="flex flex-col gap-3.5">
-              {IMMUNIZATIONS.map((imm) => (
-                <div key={imm.name} className="flex items-start gap-2.5">
-                  {imm.done ? (
-                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-                  ) : (
-                    <Clock size={16} className="text-amber-500 shrink-0 mt-0.5" />
-                  )}
-                  <div>
-                    <p className="font-semibold text-ink text-[13px]">{imm.name}</p>
-                    <p className={`text-[11.5px] ${imm.done ? "text-slate-400" : "text-amber-600"}`}>{imm.detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT column */}
-        <div className="flex flex-col gap-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-1.5">
-                <Activity size={15} className="text-brand" />
-                <p className="font-bold text-ink text-[15px]">Visit Timeline</p>
-              </div>
-              <div className="flex bg-slate-100 rounded-full p-1">
-                <button
-                  onClick={() => setTimelineFilter("6months")}
-                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-colors ${
-                    timelineFilter === "6months" ? "bg-white text-ink shadow-sm" : "text-slate-500"
-                  }`}
-                >
-                  6 Months
-                </button>
-                <button
-                  onClick={() => setTimelineFilter("all")}
-                  className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-colors ${
-                    timelineFilter === "all" ? "bg-brand text-white" : "text-slate-500"
-                  }`}
-                >
-                  All History
-                </button>
-              </div>
-            </div>
-
-            <div>
-              {visibleTimeline.length > 0 ? (
-                visibleTimeline.map((entry, i) => (
-                  <MedicalRecordsTimelineEntry key={entry.title} {...entry} isLast={i === visibleTimeline.length - 1} />
-                ))
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <section className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+              <div className="border-b border-slate-100 px-5 py-4"><h2 className="font-bold text-ink">Visit History</h2><p className="text-xs text-slate-500">Appointments recorded in the database</p></div>
+              {filteredAppointments.length === 0 ? (
+                <p className="px-5 py-10 text-center text-sm text-slate-500">No visits match this search.</p>
               ) : (
-                <p className="text-slate-400 text-[13px] text-center py-6">No visits match your search.</p>
-              )}
-            </div>
-
-            {timelineFilter === "6months" && (
-              <button
-                onClick={() => setTimelineFilter("all")}
-                className="w-full mt-2 py-2.5 border border-dashed border-slate-300 rounded-lg text-slate-500 text-[13px] font-medium hover:bg-slate-50 transition-colors"
-              >
-                Load More History
-              </button>
-            )}
-          </div>
-
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <p className="font-bold text-ink text-[15px]">Recent Lab Reports</p>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              {labReports.map((report) => (
-                <div key={report.name}>
-                  <div className={`${report.preview} rounded-lg aspect-[4/3] flex items-center justify-center mb-2`}>
-                    <report.icon size={26} className={report.preview === "bg-slate-700" ? "text-white" : "text-slate-400"} />
-                  </div>
-                  <p className="text-[12px] font-semibold text-ink truncate">{report.name}</p>
-                  <p className="text-[11px] text-slate-400">{report.date}</p>
+                <div className="divide-y divide-slate-100">
+                  {filteredAppointments.map((appointment) => (
+                    <article key={appointment._id} className="p-5">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div><p className="font-semibold text-ink">{appointment.reason}</p><p className="mt-1 text-xs text-slate-500">{appointment.department?.name || "Department"} - {formatDate(appointment.appointmentDate)} at {appointment.timeSlot}</p></div>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusClass(appointment.status)}`}>{appointment.status}</span>
+                      </div>
+                      <p className="mt-3 text-xs text-slate-500">Doctor: {appointment.doctor?.user?.name || "Current doctor"}</p>
+                    </article>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+              )}
+            </section>
 
-      {/* Add Condition modal */}
-      {isConditionModalOpen && (
-        <div className="fixed inset-0 z-30 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-extrabold text-[16px] text-ink">Add Condition</h2>
-              <button onClick={() => setIsConditionModalOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X size={18} />
-              </button>
-            </div>
-            <form onSubmit={handleAddCondition} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-[12px] font-bold text-slate-600 mb-1.5">Condition Name</label>
-                <input
-                  value={newCondition.name}
-                  onChange={(e) => setNewCondition((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g. Asthma"
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-[13.5px] outline-none focus:border-brand"
-                />
-              </div>
-              <div>
-                <label className="block text-[12px] font-bold text-slate-600 mb-1.5">Detail (optional)</label>
-                <input
-                  value={newCondition.detail}
-                  onChange={(e) => setNewCondition((prev) => ({ ...prev, detail: e.target.value }))}
-                  placeholder="e.g. Diagnosed Jan 2024"
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-[13.5px] outline-none focus:border-brand"
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-brand hover:bg-brand-dark text-white font-semibold text-[13.5px] py-2.5 rounded-lg transition-colors mt-1"
-              >
-                Add Condition
-              </button>
-            </form>
+            <section className="h-fit overflow-hidden rounded-lg border border-slate-200 bg-white">
+              <div className="border-b border-slate-100 px-5 py-4"><h2 className="font-bold text-ink">Prescriptions</h2><p className="text-xs text-slate-500">Finalized clinical records</p></div>
+              {!record.prescriptions?.length ? (
+                <div className="px-5 py-10 text-center"><FileText size={26} className="mx-auto mb-2 text-slate-300" /><p className="text-sm text-slate-500">No prescription has been finalized.</p></div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {record.prescriptions.map((prescription) => (
+                    <article key={prescription._id} className="p-5">
+                      <div className="flex items-start justify-between gap-3"><div><p className="font-bold text-ink">{prescription.diagnosis}</p><p className="text-xs text-slate-500">{formatDate(prescription.createdAt)} by {prescription.doctor?.user?.name || "Doctor"}</p></div>{canDownloadPrescriptions ? <button type="button" title="Download prescription PDF" aria-label={`Download prescription for ${prescription.diagnosis}`} disabled={downloadingPrescriptionId === prescription._id} onClick={() => handlePrescriptionDownload(prescription)} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-brand disabled:opacity-50"><Download size={15} /></button> : <Pill size={17} className="shrink-0 text-brand" />}</div>
+                      {prescription.symptoms && <p className="mt-3 text-sm text-slate-600">{prescription.symptoms}</p>}
+                      <div className="mt-3 space-y-1.5">
+                        {prescription.medicines.map((medicine) => (
+                          <p key={`${prescription._id}-${medicine.drugName}`} className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-700"><span className="font-semibold">{medicine.drugName}</span>{medicine.dosage ? ` ${medicine.dosage}` : ""} - {medicine.frequency}</p>
+                        ))}
+                      </div>
+                      {prescription.advice && <p className="mt-3 text-xs text-slate-500">Advice: {prescription.advice}</p>}
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, ArrowRight, Stethoscope, Users } from "lucide-react";
 
@@ -51,6 +50,10 @@ export default function Hero() {
           <img
             src="https://picsum.photos/seed/medflow-hero/600/750"
             alt="Doctor with patient"
+            width="600"
+            height="750"
+            fetchPriority="high"
+            decoding="async"
             className="rounded-xl2 shadow-2xl aspect-[4/5] w-full object-cover rotate-2"
           />
 

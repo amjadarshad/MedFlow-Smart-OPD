@@ -1,188 +1,128 @@
-import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Mic, MicOff, VideoIcon, VideoOff, ImagePlus, MoreHorizontal, PhoneOff, Activity,
-  Heart, Gauge, Droplet, Thermometer, FileText, FileImage, File,
-  Download, ClipboardPlus, FlaskConical, History, UserPlus2, Maximize, Mail,
-} from "lucide-react";
-import ClinicalDataPanel from "../components/functions/ClinicalDataPanel.jsx";
-import ChatPanel from "../components/functions/ChatPanel.jsx";
-import { liveVitals as VITALS, sharedDocuments as DOCUMENTS, quickActions as QUICK_ACTIONS, chatMessages as CHAT_MESSAGES } from "../data/allData.js";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, FileText, Mic, MicOff, PhoneOff, UserRound, VideoIcon, VideoOff } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { appointmentVisitTypes } from "../constants/appointmentConstants.js";
+import { userRoles } from "../constants/authConstants.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import { getDoctorAppointments, getMyAppointments } from "../services/appointmentService.js";
 
 export default function Telemedicine() {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
-
-  const [activeTab, setActiveTab] = useState("clinical"); // "clinical" | "chat"
+  const { role } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [appointments, setAppointments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [lastSharedFile, setLastSharedFile] = useState(null);
+  const [notes, setNotes] = useState("");
 
-  function handleImageSelected(e) {
-    const file = e.target.files?.[0];
-    if (file) setLastSharedFile(file.name);
-    e.target.value = ""; // reset so selecting the same file again still fires onChange
+  const appointmentId = searchParams.get("appointmentId") || "";
+
+  useEffect(() => {
+    let isActive = true;
+    const loadAppointments = role === userRoles.doctor
+      ? getDoctorAppointments
+      : getMyAppointments;
+
+    loadAppointments()
+      .then((data) => {
+        if (!isActive) return;
+        const telemedicineAppointments = (data.appointments || []).filter(
+          (appointment) => appointment.visitType === appointmentVisitTypes.telemedicine,
+        );
+        setAppointments(telemedicineAppointments);
+
+        if (
+          !telemedicineAppointments.some((appointment) => appointment._id === appointmentId) &&
+          telemedicineAppointments[0]
+        ) {
+          setSearchParams({ appointmentId: telemedicineAppointments[0]._id }, { replace: true });
+        }
+      })
+      .catch((error) => {
+        if (isActive) setErrorMessage(error.message || "Unable to load telemedicine appointments.");
+      })
+      .finally(() => {
+        if (isActive) setIsLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [appointmentId, role, setSearchParams]);
+
+  const selectedAppointment = useMemo(
+    () => appointments.find((appointment) => appointment._id === appointmentId) || null,
+    [appointmentId, appointments],
+  );
+
+  const participant = role === userRoles.doctor
+    ? selectedAppointment?.patient
+    : selectedAppointment?.doctor?.user;
+
+  if (isLoading) {
+    return <p className="py-12 text-center text-sm text-slate-500">Loading telemedicine appointments...</p>;
   }
 
-  function handleEnterFullscreen() {
-    document.documentElement.requestFullscreen?.();
-    setIsMoreMenuOpen(false);
-  }
-
-  function handleEndCall() {
-    navigate("/dashboard/appointments");
+  if (!selectedAppointment) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white px-6 py-12 text-center">
+        <VideoOff size={32} className="mx-auto mb-3 text-slate-300" />
+        <h1 className="font-display text-xl font-extrabold text-ink">No telemedicine appointment</h1>
+        <p className="mt-2 text-sm text-slate-500">Online appointments booked in the system will appear here.</p>
+      </div>
+    );
   }
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
-        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-        <p className="text-[13px] font-semibold text-ink">Live Consultation: Patient ID #8842</p>
-      </div>
+      <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div><h1 className="font-display text-2xl font-extrabold text-ink">Telemedicine</h1><p className="mt-1 text-sm text-slate-500">Appointment with {participant?.name || "Participant"}</p></div>
+        <select value={selectedAppointment._id} onChange={(event) => setSearchParams({ appointmentId: event.target.value })} className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand">
+          {appointments.map((appointment) => {
+            const name = role === userRoles.doctor ? appointment.patient?.name : appointment.doctor?.user?.name;
+            return <option key={appointment._id} value={appointment._id}>{name || "Appointment"} - {new Date(appointment.appointmentDate).toLocaleDateString()}</option>;
+          })}
+        </select>
+      </header>
 
-      <div className="grid xl:grid-cols-[1fr_340px] gap-6">
-        <div className="relative rounded-xl overflow-hidden bg-slate-800 aspect-[4/3] xl:aspect-auto xl:min-h-[520px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-800" />
+      {errorMessage && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</p>}
 
-          <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-lg px-3.5 py-2">
-            <p className="text-white font-bold text-[13px]">Eleanor Rigby, 74</p>
-            <p className="text-slate-300 text-[11px]">📍 London, UK</p>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="relative min-h-[480px] overflow-hidden rounded-lg bg-slate-900">
+          <div className="absolute left-4 top-4 rounded-lg bg-black/60 px-3.5 py-2 text-white">
+            <p className="font-bold">{participant?.name || "Participant"}</p>
+            <p className="text-xs text-slate-300">{participant?.email || ""}</p>
           </div>
 
-          <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-mint" />
-            <span className="text-white text-[12px] font-semibold">15:15</span>
+          <div className="absolute inset-0 grid place-items-center">
+            {isCameraOff ? <VideoOff size={54} className="text-slate-600" /> : <UserRound size={64} className="text-slate-600" />}
           </div>
 
-          {isCameraOff ? (
-            <div className="absolute bottom-20 right-4 w-24 h-16 rounded-lg bg-slate-900 border-2 border-white/30 flex items-center justify-center">
-              <VideoOff size={16} className="text-slate-400" />
+          <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full bg-black/70 px-4 py-3">
+            <button type="button" aria-label={isMuted ? "Unmute" : "Mute"} onClick={() => setIsMuted((currentValue) => !currentValue)} className={`grid h-10 w-10 place-items-center rounded-full text-white ${isMuted ? "bg-red-500" : "bg-white/15"}`}>{isMuted ? <MicOff size={17} /> : <Mic size={17} />}</button>
+            <button type="button" aria-label={isCameraOff ? "Turn camera on" : "Turn camera off"} onClick={() => setIsCameraOff((currentValue) => !currentValue)} className={`grid h-10 w-10 place-items-center rounded-full text-white ${isCameraOff ? "bg-red-500" : "bg-white/15"}`}>{isCameraOff ? <VideoOff size={17} /> : <VideoIcon size={17} />}</button>
+            <button type="button" onClick={() => navigate(role === userRoles.doctor ? "/dashboard/appointments" : "/dashboard")} className="inline-flex items-center gap-2 rounded-full bg-red-500 px-4 py-2.5 text-sm font-semibold text-white"><PhoneOff size={16} /> End</button>
+          </div>
+        </section>
+
+        <aside className="h-fit rounded-lg border border-slate-200 bg-white p-5">
+          <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-5"><CalendarDays size={18} className="text-brand" /><div><p className="font-bold text-ink">Appointment Details</p><p className="text-xs capitalize text-slate-500">{selectedAppointment.status}</p></div></div>
+          <dl className="space-y-4 text-sm">
+            <div><dt className="text-xs text-slate-400">Date and time</dt><dd className="mt-1 font-semibold text-ink">{new Date(selectedAppointment.appointmentDate).toLocaleDateString()} at {selectedAppointment.timeSlot}</dd></div>
+            <div><dt className="text-xs text-slate-400">Department</dt><dd className="mt-1 font-semibold text-ink">{selectedAppointment.department?.name || "-"}</dd></div>
+            <div><dt className="text-xs text-slate-400">Reason</dt><dd className="mt-1 text-slate-700">{selectedAppointment.reason}</dd></div>
+          </dl>
+
+          {role === userRoles.doctor && (
+            <div className="mt-6 border-t border-slate-100 pt-5">
+              <label className="mb-2 flex items-center gap-2 text-sm font-bold text-ink"><FileText size={15} className="text-brand" /> Consultation Notes</label>
+              <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={5} placeholder="Enter consultation observations..." className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-brand" />
             </div>
-          ) : (
-            <div className="absolute bottom-20 right-4 w-24 h-16 rounded-lg bg-slate-500 border-2 border-white/30" />
           )}
-
-          {lastSharedFile && (
-            <div className="absolute bottom-20 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1.5">
-              <p className="text-white text-[11px]">📎 Shared: {lastSharedFile}</p>
-            </div>
-          )}
-
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-2.5">
-            <button
-              onClick={() => setIsMuted((prev) => !prev)}
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-white transition-colors ${
-                isMuted ? "bg-red-500 hover:bg-red-600" : "bg-white/15 hover:bg-white/25"
-              }`}
-            >
-              {isMuted ? <MicOff size={16} /> : <Mic size={16} />}
-            </button>
-            <button
-              onClick={() => setIsCameraOff((prev) => !prev)}
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-white transition-colors ${
-                isCameraOff ? "bg-red-500 hover:bg-red-600" : "bg-white/15 hover:bg-white/25"
-              }`}
-            >
-              {isCameraOff ? <VideoOff size={16} /> : <VideoIcon size={16} />}
-            </button>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors"
-            >
-              <ImagePlus size={16} />
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageSelected}
-              className="hidden"
-            />
-
-            <div className="relative">
-              <button
-                onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-                className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors"
-              >
-                <MoreHorizontal size={16} />
-              </button>
-              {isMoreMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setIsMoreMenuOpen(false)} />
-                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-44 bg-white rounded-lg shadow-lg overflow-hidden z-20">
-                    <button
-                      onClick={handleEnterFullscreen}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-600 hover:bg-slate-50 text-left"
-                    >
-                      <Maximize size={14} />
-                      Enter Fullscreen
-                    </button>
-                    
-                    <a
-                      href="mailto:support@medflow.com?subject=Telemedicine%20issue"
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-slate-600 hover:bg-slate-50 text-left"
-                    >
-                      <Mail size={14} />
-                      Report Issue
-                    </a>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <button
-              onClick={handleEndCall}
-              className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-[13px] font-semibold px-4 py-2 rounded-full transition-colors ml-1"
-            >
-              <PhoneOff size={15} />
-              End Call
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 flex flex-col">
-          <div className="flex border-b border-slate-200 shrink-0">
-            <button
-              onClick={() => setActiveTab("clinical")}
-              className={`flex-1 py-3.5 text-[13px] font-bold border-b-2 transition-colors ${
-                activeTab === "clinical" ? "border-brand text-brand" : "border-transparent text-slate-400"
-              }`}
-            >
-              Clinical Data
-            </button>
-            <button
-              onClick={() => setActiveTab("chat")}
-              className={`flex-1 py-3.5 text-[13px] font-bold border-b-2 transition-colors ${
-                activeTab === "chat" ? "border-brand text-brand" : "border-transparent text-slate-400"
-              }`}
-            >
-              Chat &amp; Files
-            </button>
-          </div>
-
-          <div className="p-5 flex-1 min-h-0">
-            {activeTab === "clinical" ? (
-              <ClinicalDataPanel vitals={VITALS} documents={DOCUMENTS} />
-            ) : (
-              <ChatPanel messages={CHAT_MESSAGES} />
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid sm:grid-cols-4 gap-4 mt-6">
-        {QUICK_ACTIONS.map(({ label, sublabel, icon: Icon, path }) => (
-          <button
-            key={label}
-            onClick={() => navigate(path)}
-            className="bg-white rounded-xl border border-slate-200 p-4 text-left hover:border-brand transition-colors"
-          >
-            <Icon size={18} className="text-brand mb-2" />
-            <p className="text-[11px] text-slate-400 font-semibold">{sublabel}</p>
-            <p className="font-bold text-ink text-[13.5px]">{label}</p>
-          </button>
-        ))}
+        </aside>
       </div>
     </div>
   );

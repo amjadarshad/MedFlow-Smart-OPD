@@ -1,7 +1,6 @@
-import React from "react";
 import { Globe, Share2 } from "lucide-react";
 import FooterColumn from "./functions/FooterColumn.jsx";
-import { productLinks as PRODUCT_LINKS, resourceLinks as RESOURCE_LINKS, legalLinks as LEGAL_LINKS } from "../data/allData.js";
+import { productLinks, resourceLinks, legalLinks } from "../data/landingData.js";
 
 export default function Footer() {
   return (
@@ -14,19 +13,19 @@ export default function Footer() {
           </p>
         </div>
 
-        <FooterColumn title="Product" links={PRODUCT_LINKS} />
-        <FooterColumn title="Resources" links={RESOURCE_LINKS} />
-        <FooterColumn title="Legal" links={LEGAL_LINKS} />
+        <FooterColumn title="Product" links={productLinks} />
+        <FooterColumn title="Resources" links={resourceLinks} />
+        <FooterColumn title="Legal" links={legalLinks} />
       </div>
 
       <div className="border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 py-5 flex items-center justify-between">
           <p className="text-[13.5px] font-medium text-slate-600">
-            © 2024 MedFlow Systems Inc. All rights reserved.
+            © {new Date().getFullYear()} MedFlow portfolio project.
           </p>
           <div className="flex items-center gap-4 text-slate-500">
-            <Globe size={18} className="hover:text-brand cursor-pointer transition-colors" />
-            <Share2 size={18} className="hover:text-brand cursor-pointer transition-colors" />
+            <a href="/about" aria-label="About MedFlow" className="hover:text-brand transition-colors"><Globe size={18} /></a>
+            <a href="mailto:support@medflow.com" aria-label="Contact MedFlow" className="hover:text-brand transition-colors"><Share2 size={18} /></a>
           </div>
         </div>
       </div>

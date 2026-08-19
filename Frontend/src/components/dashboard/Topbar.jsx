@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Bell, Settings, LogOut } from "lucide-react";
-import { roleNavItems, bookingDoctors, topbarNotifications } from "../../data/allData";
+import { Search, Bell, Settings, LogOut, Menu } from "lucide-react";
+import { roleNavItems } from "../../config/navigation.js";
+import { bookingDoctors } from "../../data/bookingData.js";
+import { topbarNotifications } from "../../data/topbarData.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 
-export default function Topbar() {
+export default function Topbar({ onMenuClick }) {
   const navigate = useNavigate();
   const { role, user, logout } = useAuth();
   const dashboardNavItems = roleNavItems[role] || [];
@@ -38,7 +40,15 @@ export default function Topbar() {
   }
 
   return (
-    <header className="relative flex items-center gap-4 px-6 py-4 bg-white border-b border-slate-200">
+    <header className="relative flex items-center gap-2 sm:gap-4 px-4 sm:px-6 py-4 bg-white border-b border-slate-200">
+      <button
+        type="button"
+        aria-label="Open dashboard menu"
+        onClick={onMenuClick}
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden"
+      >
+        <Menu size={19} />
+      </button>
       <p className="font-display font-extrabold text-brand text-[17px] hidden lg:block shrink-0">
         MedFlow Smart OPD
       </p>
@@ -91,7 +101,7 @@ export default function Topbar() {
                     onClick={() => goToPage("/dashboard/book-appointment")}
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-[13.5px] text-ink hover:bg-slate-50 text-left"
                   >
-                    <img src={doc.photo} alt={doc.name} className="w-6 h-6 rounded-full object-cover" />
+                    <img src={doc.photo} alt={doc.name} width="24" height="24" loading="lazy" decoding="async" className="w-6 h-6 rounded-full object-cover" />
                     {doc.fullTitle}
                   </button>
                 ))}
@@ -104,6 +114,8 @@ export default function Topbar() {
       <div className="flex items-center gap-4 shrink-0">
         <div className="relative z-20">
           <button
+            type="button"
+            aria-label="Open notifications"
             onClick={() => {
               setIsBellOpen((prev) => !prev);
               setIsSettingsOpen(false);
@@ -130,6 +142,8 @@ export default function Topbar() {
 
         <div className="relative z-20">
           <button
+            type="button"
+            aria-label="Open account settings"
             onClick={() => {
               setIsSettingsOpen((prev) => !prev);
               setIsBellOpen(false);
@@ -154,6 +168,8 @@ export default function Topbar() {
 
         <div className="relative z-20">
           <button
+            type="button"
+            aria-label="Open profile menu"
             onClick={() => {
               setIsProfileOpen((prev) => !prev);
               setIsBellOpen(false);
@@ -172,6 +188,9 @@ export default function Topbar() {
                   </p>
                   <p className="text-[11.5px] text-slate-400 truncate">
                     {user?.email || ""}
+                  </p>
+                  <p className="mt-0.5 text-[10.5px] font-semibold capitalize text-brand">
+                    {user?.role || ""}
                   </p>
                 </div>
               </div>

@@ -1,12 +1,12 @@
 import React from "react";
 import { Check } from "lucide-react";
 
-const STEPS = ["Specialization", "Schedule", "Details"];
+const steps = ["Specialization", "Schedule", "Details"];
 
 export default function BookAppointmentStepIndicator({ currentStep }) {
   return (
-    <div className="flex items-center mb-8">
-      {STEPS.map((label, i) => {
+    <div className="flex items-center mb-8" aria-label={`Appointment step ${currentStep} of ${steps.length}`}>
+      {steps.map((label, i) => {
         const stepNum = i + 1;
         const isActive = stepNum === currentStep;
         const isDone = stepNum < currentStep;
@@ -32,7 +32,7 @@ export default function BookAppointmentStepIndicator({ currentStep }) {
                 {label}
               </span>
             </div>
-            {i < STEPS.length - 1 && (
+            {i < steps.length - 1 && (
               <div className={`flex-1 h-px mx-3 ${stepNum < currentStep ? "bg-mint" : "bg-slate-200"}`} />
             )}
           </React.Fragment>

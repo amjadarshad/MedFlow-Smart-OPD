@@ -1,5 +1,4 @@
-import React from "react";
-import { leadershipTeam as LEADERSHIP_TEAM, impactStats as IMPACT_STATS } from "../../data/allData.js";
+import { leadershipTeam, impactStats } from "../../data/aboutData.js";
 
 export default function VisionMissionTeam() {
   return (
@@ -32,10 +31,10 @@ export default function VisionMissionTeam() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-          {LEADERSHIP_TEAM.map((member) => (
+          {leadershipTeam.map((member) => (
             <div key={member.name}>
               
-<img src={member.photo} alt={member.name} className="w-full aspect-[4/5] rounded-lg object-cover mb-3" />              <p className="font-bold text-ink text-[14.5px]">{member.name}</p>
+<img src={member.photo} alt={member.name} width="400" height="500" loading="lazy" decoding="async" className="w-full aspect-[4/5] rounded-lg object-cover mb-3" />              <p className="font-bold text-ink text-[14.5px]">{member.name}</p>
               <p className="text-brand text-[11.5px] font-bold uppercase tracking-wide">{member.role}</p>
             </div>
           ))}
@@ -43,7 +42,7 @@ export default function VisionMissionTeam() {
 
         {/* Impact stats */}
         <div className="bg-brand rounded-2xl p-10 grid sm:grid-cols-3 gap-8 text-center divide-y sm:divide-y-0 sm:divide-x divide-white/20">
-          {IMPACT_STATS.map((s) => (
+          {impactStats.map((s) => (
             <div key={s.label} className="pt-6 sm:pt-0 first:pt-0">
               <p className="font-display font-extrabold text-white text-[34px] mb-1">{s.value}</p>
               <p className="text-white font-semibold text-[14px] mb-1">{s.label}</p>

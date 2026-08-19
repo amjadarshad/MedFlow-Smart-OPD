@@ -1,6 +1,5 @@
-import React from "react";
 import { UserRound, BriefcaseMedical } from "lucide-react";
-import { patientSteps as PATIENT_STEPS, doctorSteps as DOCTOR_STEPS } from "../data/allData.js";
+import { patientSteps, doctorSteps } from "../data/landingData.js";
 import JourneyColumn from "./functions/JourneyColumn.jsx";
 
 export default function ClinicalJourney() {
@@ -22,14 +21,14 @@ export default function ClinicalJourney() {
             heading="For Patients"
             headingColor="text-brand"
             dotColor="bg-brand"
-            steps={PATIENT_STEPS}
+            steps={patientSteps}
           />
           <JourneyColumn
             icon={BriefcaseMedical}
             heading="For Doctors"
             headingColor="text-mint"
             dotColor="bg-mint"
-            steps={DOCTOR_STEPS}
+            steps={doctorSteps}
           />
         </div>
       </div>

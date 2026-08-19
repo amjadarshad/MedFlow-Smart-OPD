@@ -1,7 +1,5 @@
-import React from "react";
-import StarRating from "./functions/StarRating.jsx";
 import TestimonialCard from "./functions/TestimonialCard.jsx";
-import { testimonials as TESTIMONIALS } from "../data/allData.js";
+import { testimonials } from "../data/landingData.js";
 
 export default function Testimonials() {
   return (
@@ -17,7 +15,7 @@ export default function Testimonials() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t) => (
+          {testimonials.map((t) => (
             <TestimonialCard key={t.name} {...t} />
           ))}
         </div>

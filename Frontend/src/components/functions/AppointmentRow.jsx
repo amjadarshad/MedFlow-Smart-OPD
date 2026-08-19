@@ -1,4 +1,3 @@
-import React from "react";
 import { ChevronRight } from "lucide-react";
 
 export default function AppointmentRow({ token, name, detail, status, action, actionStyle, onAction }) {

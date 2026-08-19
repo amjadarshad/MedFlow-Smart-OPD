@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function TimelineStep({ number, title, description, dotColor, isLast }) {
   return (

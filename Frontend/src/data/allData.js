@@ -1,10 +1,10 @@
 import {
-  UserRound, BriefcaseMedical, ShieldCheck, User,
+  UserRound, BriefcaseMedical, ShieldCheck,
   Plus, Briefcase, HeartPulse, Microscope, Asterisk,
-  LayoutGrid, CalendarDays, ListOrdered, FileText, Video, Receipt,
-  Users, AlertTriangle, Timer, Ticket, Link2,
+  FileText,
+  Users, AlertTriangle,
   Clock,
-  UserPlus, Wallet, CalendarClock,
+  Wallet,
   Heart, Gauge, Droplet, Thermometer, FileImage, File,
   ClipboardPlus, FlaskConical, History, UserPlus2,
   CheckCircle2, XCircle, RefreshCcw,
@@ -133,15 +133,6 @@ export const faqs = [
 ];
 
 /* =========================================================
-   LOGIN PAGE — Role selector
-========================================================= */
-export const loginRoles = [
-  { id: "patient", label: "Patient", icon: User },
-  { id: "doctor", label: "Doctor", icon: BriefcaseMedical },
-  { id: "admin", label: "Admin", icon: ShieldCheck },
-];
-
-/* =========================================================
    ABOUT PAGE
 ========================================================= */
 export const storyStats = [
@@ -171,83 +162,16 @@ export const globalOffices = [
 ];
 
 /* =========================================================
-   DASHBOARD — Sidebar navigation
-========================================================= */
-// Sidebar menu items, separate per role — each role only sees pages relevant to them
-export const roleNavItems = {
-  patient: [
-    { label: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
-    { label: "Book Appointment", icon: CalendarDays, path: "/dashboard/book-appointment" },
-    { label: "Telemedicine", icon: Video, path: "/dashboard/telemedicine" },
-    { label: "Billing", icon: Receipt, path: "/dashboard/billing" },
-    { label: "Medical Records", icon: FileText, path: "/dashboard/records" },
-  ],
-  doctor: [
-    { label: "Appointments", icon: LayoutGrid, path: "/dashboard/appointments" },
-    { label: "Prescriptions", icon: ClipboardPlus, path: "/dashboard/prescription" },
-    { label: "Queue Status", icon: ListOrdered, path: "/dashboard/queue" },
-    { label: "Telemedicine", icon: Video, path: "/dashboard/telemedicine" },
-    { label: "Medical Records", icon: FileText, path: "/dashboard/records" },
-  ],
-  admin: [
-    { label: "Admin Overview", icon: LayoutGrid, path: "/dashboard/admin" },
-    { label: "Queue Status", icon: ListOrdered, path: "/dashboard/queue" },
-    { label: "Billing", icon: Receipt, path: "/dashboard/billing" },
-    { label: "Medical Records", icon: FileText, path: "/dashboard/records" },
-  ],
-};
-
-// Which roles are allowed to view each /dashboard/* route — used by DashboardLayout
-// to redirect a role away from pages that aren't meant for them
-export const pageRoles = {
-  "/dashboard": ["patient"],
-  "/dashboard/appointments": ["doctor"],
-  "/dashboard/admin": ["admin"],
-  "/dashboard/book-appointment": ["patient", "doctor", "admin"],
-  "/dashboard/prescription": ["doctor"],
-  "/dashboard/queue": ["doctor", "admin"],
-  "/dashboard/telemedicine": ["patient", "doctor"],
-  "/dashboard/billing": ["patient", "admin"],
-  "/dashboard/records": ["patient", "doctor", "admin"],
-};
-
-/* =========================================================
    DOCTORS — used across Patient Dashboard & Book Appointment
 ========================================================= */
-export const availableDoctors = [
-  { name: "Dr. Lisa Chen", spec: "Dermatologist", exp: "12yrs exp", rating: 4.9, category: "Dermatology", photo: "https://i.pravatar.cc/150?img=32" },
-  { name: "Dr. Marcus Webb", spec: "Neurology", exp: "8yrs exp", rating: 4.7, category: "Neurology", photo: "https://i.pravatar.cc/150?img=13" },
-  { name: "Dr. Sofia Rossi", spec: "General Physician", exp: "15yrs exp", rating: 4.8, category: "Cardiology", photo: "https://i.pravatar.cc/150?img=45" },
-];
-
-export const doctorCategories = ["All", "Cardiology", "Neurology"];
-
-export const bookingDoctors = [
-  { id: "dr-johnson", name: "Dr. S. Johnson", dept: "Cardiology", fullTitle: "Dr. Sarah Johnson (Senior Cardiologist)", photo: "https://i.pravatar.cc/150?img=47" },
-  { id: "dr-chen", name: "Dr. M. Chen", dept: "Cardiology", fullTitle: "Dr. M. Chen (Cardiologist)", photo: "https://i.pravatar.cc/150?img=13" },
-  { id: "dr-rodriguez", name: "Dr. E. Rodriguez", dept: "Neurology", fullTitle: "Dr. E. Rodriguez (Neurologist)", photo: "https://i.pravatar.cc/150?img=32" },
-];
-
-export const bookingDepartments = ["Cardiology", "Neurology", "Pediatrics", "General Medicine"];
-export const bookingSteps = ["Specialization", "Schedule", "Details"];
 
 /* =========================================================
    PATIENT DASHBOARD — Prescription history
 ========================================================= */
-export const prescriptions = [
-  { date: "12 Oct 2023", id: "#PX9012", doctor: "Dr. Lisa Chen", dept: "Dermatology", diagnosis: "Acute Dermatitis", status: "Completed" },
-  { date: "28 Sep 2023", id: "#PX8824", doctor: "Dr. Aris Thorne", dept: "Cardiology", diagnosis: "Blood Pressure Check", status: "Completed" },
-  { date: "15 Aug 2023", id: "#PX7741", doctor: "Dr. Marcus Webb", dept: "Neurology", diagnosis: "Migraine Review", status: "Archived" },
-];
 
 /* =========================================================
    DOCTOR APPOINTMENTS PAGE
 ========================================================= */
-export const scheduleKpis = [
-  { label: "Patients Seen Today", value: "24", note: "+3 since 1h", noteColor: "text-emerald-600", icon: Users, tint: "text-mint", tintBg: "bg-mint-light" },
-  { label: "Pending Reviews", value: "08", note: "Urgent", noteColor: "text-red-500", icon: AlertTriangle, tint: "text-red-500", tintBg: "bg-red-50" },
-  { label: "Avg. Wait Time", value: "12", suffix: "minutes", icon: Timer, tint: "text-brand", tintBg: "bg-brand-light" },
-];
 
 export const todayAppointments = [
   { token: "TK 14", name: "Sarah Jenkins", detail: "Check-up · 10:30 AM", status: "Checked In", action: "Call Next", actionStyle: "filled" },
@@ -267,29 +191,6 @@ export const rxTemplates = ["Fever Cluster", "Post-Op Recovery", "Standard Labs"
 export const clinicalHistory = [
   { dot: "bg-red-500", title: "Hypertension Type II", detail: "Diagnosed 2021 · Managed via Amlodipine" },
   { dot: "bg-emerald-500", title: "Allergy: Penicillin", detail: "Severe reaction noted in 2018" },
-];
-
-/* =========================================================
-   ADMIN DASHBOARD
-========================================================= */
-export const adminKpis = [
-  { label: "Total Patients", value: "12,842", note: "↗ +12% from last month", noteColor: "text-emerald-600", icon: Users },
-  { label: "Total Doctors", value: "48", note: "6 currently on-call", noteColor: "text-slate-500", icon: UserPlus },
-  { label: "Revenue", value: "$42,390", note: "↗ 8.4% daily growth", noteColor: "text-emerald-600", icon: Wallet },
-  { label: "Today's Appointments", value: "156", note: "⚠ 12 pending approvals", noteColor: "text-amber-600", icon: CalendarClock },
-];
-
-export const approvals = [
-  { initials: "RA", avatarBg: "bg-brand", name: "Robert Anderson", id: "#P-9021", doctor: "Dr. Emily Stone", dept: "Cardiology", type: "PHYSICAL", action: "Issue Token", actionIcon: Ticket },
-  { initials: "ML", avatarBg: "bg-mint", name: "Maria Lopez", id: "#P-8812", doctor: "Dr. Alan Turing", dept: "Neurology", type: "VIRTUAL", action: "Create Link", actionIcon: Link2 },
-  { initials: "JW", avatarBg: "bg-slate-500", name: "James Wilson", id: "#P-9155", doctor: "Dr. Sarah Connor", dept: "Pediatrics", type: "PHYSICAL", action: "Issue Token", actionIcon: Ticket },
-];
-
-export const queueRooms = [
-  { room: "Room 102 · Cardiology", doctor: "Dr. Emily Stone", borderColor: "border-mint", status: "C-014", statusLabel: "Current Token", statusColor: "text-mint" },
-  { room: "Room 105 · Neurology", doctor: "Dr. Alan Turing", borderColor: "border-brand", status: "N-008", statusLabel: "Current Token", statusColor: "text-brand" },
-  { room: "Room 201 · General", doctor: "Empty", borderColor: "border-slate-300", status: "Idle", statusLabel: null, statusColor: "text-slate-400", isBadge: true },
-  { room: "Room 204 · Emergency", doctor: "Critical Case", borderColor: "border-red-500", status: "Locked", statusLabel: null, statusColor: "text-red-500", isBadge: true, icon: true },
 ];
 
 /* =========================================================
@@ -352,12 +253,6 @@ export const sharedDocuments = [
   { name: "blood_report_Q3.pdf", meta: "Shared by Patient", icon: File, iconBg: "bg-mint-light", iconColor: "text-mint" },
 ];
 
-// export const quickActions = [
-//   { label: "New Prescription", sublabel: "Action", icon: ClipboardPlus },
-//   { label: "Lab Investigation", sublabel: "Request", icon: FlaskConical },
-//   { label: "Past History", sublabel: "Review", icon: History },
-//   { label: "Specialist Referral", sublabel: "Referral", icon: UserPlus2 },
-// ];
 
 export const chatMessages = [
   { from: "patient", text: "Good morning doctor, I've had this cough for about a week now." },
@@ -368,12 +263,6 @@ export const chatMessages = [
 /* =========================================================
    BILLING PAGE
 ========================================================= */
-// export const invoices = [
-//   { initials: "JD", avatarBg: "bg-brand", patient: "John Doe", id: "P-9821", date: "Oct 24, 2023", invoiceNo: "#INV-2023-001", amount: "$450.00", status: "Paid" },
-//   { initials: "AS", avatarBg: "bg-mint", patient: "Alice Smith", id: "P-9822", date: "Oct 25, 2023", invoiceNo: "#INV-2023-002", amount: "$1,200.00", status: "Pending" },
-//   { initials: "RW", avatarBg: "bg-red-400", patient: "Robert Wilson", id: "P-9755", date: "Oct 12, 2023", invoiceNo: "#INV-2023-003", amount: "$280.00", status: "Overdue" },
-//   { initials: "ML", avatarBg: "bg-slate-400", patient: "Maria Lopez", id: "P-9911", date: "Oct 26, 2023", invoiceNo: "#INV-2023-004", amount: "$89.00", status: "Paid" },
-// ];
 
 export const billingActivity = [
   { icon: CheckCircle2, tint: "text-emerald-600", bg: "bg-mint-light", title: "Payment Received", detail: "John Doe paid $450.00 via Credit Card", time: "2 mins ago" },
@@ -425,11 +314,6 @@ export const immunizations = [
   { name: "Covid-19 Booster", detail: "Due: In 2 Months", done: false },
 ];
 
-// export const visitTimeline = [
-//   { date: "MAR 15, 2024", title: "Annual Physical Exam", detail: "General check-up, vitals stable. Recommended slight adjustment in Vitamin D dosage. Next follow-up in 12 months.", by: "Dr. Sarah Miller", meta: "2 Files", tag: "COMPLETED", tagStyle: "bg-brand-light text-brand", current: true },
-//   { date: "JAN 22, 2024", title: "Blood Panel & Glucose Test", detail: "Fasting glucose levels checked. Results indicate stable management of type 2 diabetes. HbA1C at 6.4%.", by: "City Lab Services", meta: "1 Report", tag: "LAB WORK", tagStyle: "bg-slate-100 text-slate-600" },
-//   { date: "DEC 05, 2023", title: "Specialist Consultation (Cardio)", detail: "", by: "Dr. James Chen", meta: "", tag: "REFERRAL", tagStyle: "bg-slate-100 text-slate-600" },
-// ];
 
 export const labReports = [
   { name: "HbA1C_Report_March.pdf", date: "Mar 15, 2024", icon: FileText, preview: "bg-slate-100" },
@@ -480,18 +364,6 @@ export const generatedReports = [
   { name: "Q3 Patient Demographics Study", by: "By Dr. Sarah Miller", date: "Sept 28, 2023, 04:15 PM", status: "Completed", icon: BarChart3 },
 ];
 
-// Time slots for Book Appointment Step 2 (Schedule) — grouped by Morning/Afternoon/Evening
-export const bookingTimeSlots = [
-  { period: "Morning", times: ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM"] },
-  { period: "Afternoon", times: ["12:00 PM", "12:30 PM", "01:00 PM", "02:00 PM", "02:30 PM"] },
-  { period: "Evening", times: ["04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM"] },
-];
-// Notifications shown in the Topbar bell dropdown (dashboard layout)
-export const topbarNotifications = [
-  { id: 1, title: "New appointment request", detail: "Ahmed Raza booked a slot for tomorrow, 10:00 AM", time: "5m ago" },
-  { id: 2, title: "Lab report ready", detail: "Blood test results for patient #MF-882910 uploaded", time: "1h ago" },
-  { id: 3, title: "Payment received", detail: "Invoice #INV-2291 marked as paid", time: "3h ago" },
-];
 // Quick action cards on the Telemedicine page — each links to the relevant real page
 export const quickActions = [
   { label: "New Prescription", sublabel: "Action", icon: ClipboardPlus, path: "/dashboard/prescription" },

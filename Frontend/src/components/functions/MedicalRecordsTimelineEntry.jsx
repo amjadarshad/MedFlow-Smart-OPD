@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function MedicalRecordsTimelineEntry({ date, title, detail, by, meta, tag, tagStyle, current, isLast }) {
   return (

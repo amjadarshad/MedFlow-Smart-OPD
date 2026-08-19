@@ -1,8 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { UserRound, BriefcaseMedical, ShieldCheck, ChevronRight } from "lucide-react";
 import PortalCard from "./functions/PortalCard.jsx";
-import { portals as PORTALS } from "../data/allData.js";
+import { portals } from "../data/landingData.js";
 
 export default function PortalAccess() {
   return (
@@ -12,7 +9,7 @@ export default function PortalAccess() {
           Portal Access
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PORTALS.map((portal) => (
+          {portals.map((portal) => (
             <PortalCard key={portal.title} {...portal} />
           ))}
         </div>

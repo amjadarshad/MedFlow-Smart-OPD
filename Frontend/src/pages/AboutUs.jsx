@@ -1,4 +1,3 @@
-import React from "react";
 import Navbar from "../components/Navbar.jsx";
 import AboutHero from "../components/about/AboutHero.jsx";
 import VisionMissionTeam from "../components/about/VisionMissionTeam.jsx";

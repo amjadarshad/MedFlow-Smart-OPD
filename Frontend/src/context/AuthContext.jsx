@@ -1,50 +1,82 @@
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { getMyProfile } from "../services/authService.js";
+import { apiEvents } from "../constants/apiConstants.js";
+import { clearSession, readSession, writeSession } from "../lib/session.js";
+import { roleHomePaths } from "../config/navigation.js";
 
-const AuthContext = createContext(null);
+const authContext = createContext(null);
 
-// Which URL each role lands on right after login / when their session is restored
-export const ROLE_HOME_PATHS = {
-  patient: "/dashboard",
-  doctor: "/dashboard/appointments",
-  admin: "/dashboard/admin",
-};
+export { roleHomePaths };
 
 export function AuthProvider({ children }) {
-  // Persist to localStorage so refreshing the page doesn't log the user out
-  const [role, setRole] = useState(() => localStorage.getItem("medflow_role") || null);
-  const [token, setToken] = useState(() => localStorage.getItem("medflow_token") || null);
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("medflow_user");
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [session, setSession] = useState(() => readSession());
+  const [isInitializing, setIsInitializing] = useState(() => Boolean(readSession()?.token));
+
+  const logout = useCallback(() => {
+    setSession(null);
+    clearSession();
+  }, []);
+
+  useEffect(() => {
+    const handleUnauthorized = () => logout();
+    window.addEventListener(apiEvents.unauthorized, handleUnauthorized);
+    return () => window.removeEventListener(apiEvents.unauthorized, handleUnauthorized);
+  }, [logout]);
+
+  useEffect(() => {
+    const currentSession = readSession();
+    if (!currentSession?.token) {
+      setIsInitializing(false);
+      return;
+    }
+
+    let isActive = true;
+    getMyProfile()
+      .then((data) => {
+        if (!isActive) return;
+        const user = { ...currentSession.user, ...data.user };
+        const nextSession = { ...currentSession, user };
+        setSession(nextSession);
+        writeSession(nextSession);
+      })
+      .catch(() => {
+        if (isActive) logout();
+      })
+      .finally(() => {
+        if (isActive) setIsInitializing(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [session?.token, logout]);
 
   // Called after a successful /api/auth/login or /api/auth/register response
-  function login(userData, authToken) {
-    setRole(userData.role);
-    setToken(authToken);
-    setUser(userData);
-    localStorage.setItem("medflow_role", userData.role);
-    localStorage.setItem("medflow_token", authToken);
-    localStorage.setItem("medflow_user", JSON.stringify(userData));
-  }
+  const login = useCallback((userData, authToken) => {
+    const nextSession = { user: userData, token: authToken };
+    setSession(nextSession);
+    writeSession(nextSession);
+  }, []);
 
-  function logout() {
-    setRole(null);
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("medflow_role");
-    localStorage.removeItem("medflow_token");
-    localStorage.removeItem("medflow_user");
-  }
+  const value = useMemo(() => ({
+    role: session?.user?.role || null,
+    token: session?.token || null,
+    user: session?.user || null,
+    isInitializing,
+    login,
+    logout,
+  }), [session, isInitializing, login, logout]);
 
   return (
-    <AuthContext.Provider value={{ role, token, user, login, logout }}>
+    <authContext.Provider value={value}>
       {children}
-    </AuthContext.Provider>
+    </authContext.Provider>
   );
 }
 
 // Convenience hook so components can just do: const { role, token, user, login, logout } = useAuth();
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(authContext);
+  if (!context) throw new Error("useAuth must be used inside AuthProvider.");
+  return context;
 }

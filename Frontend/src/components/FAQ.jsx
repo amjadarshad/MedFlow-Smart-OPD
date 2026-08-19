@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import FAQItem from "./functions/FAQItem.jsx";
-import { faqs as FAQS } from "../data/allData.js";
+import { faqs } from "../data/landingData.js";
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
@@ -17,7 +17,7 @@ export default function FAQ() {
         </h2>
 
         <div className="flex flex-col gap-4">
-          {FAQS.map((faq, index) => (
+          {faqs.map((faq, index) => (
             <FAQItem
               key={faq.question}
               question={faq.question}

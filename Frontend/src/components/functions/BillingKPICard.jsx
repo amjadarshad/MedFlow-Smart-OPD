@@ -1,4 +1,3 @@
-import React from "react";
 
 export default function BillingKPICard({ label, value, note, icon: Icon }) {
   return (

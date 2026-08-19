@@ -1,8 +1,9 @@
-import React from "react";
 
 export default function BookAppointmentDateCard({ weekday, day, month, selected, onClick }) {
   return (
     <button
+      type="button"
+      aria-pressed={selected}
       onClick={onClick}
       className={`flex flex-col items-center justify-center w-16 h-20 rounded-lg border shrink-0 transition-colors ${
         selected ? "border-brand bg-brand text-white" : "border-slate-200 bg-white hover:border-slate-300 text-ink"

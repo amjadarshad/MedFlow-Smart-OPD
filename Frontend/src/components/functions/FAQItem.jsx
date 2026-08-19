@@ -1,10 +1,9 @@
-import React from "react";
 import { ChevronDown } from "lucide-react";
 
 export default function FAQItem({ question, answer, isOpen, onClick }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200">
-      <button onClick={onClick} className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+      <button type="button" aria-expanded={isOpen} onClick={onClick} className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
         <span className="font-bold text-ink text-[16px]">{question}</span>
         <ChevronDown
           size={20}

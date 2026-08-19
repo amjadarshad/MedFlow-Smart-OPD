@@ -1,27 +1,25 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   PlusCircle, Wallet, Clock, BadgeCheck, Calendar, Filter, ChevronDown,
   X, Printer, Mail, Eye, MoreVertical, AlertTriangle, History,
-  CheckCircle2, FileText, XCircle, RefreshCcw,
 } from "lucide-react";
 import LineChart from "../components/functions/LineChart.jsx";
 import BillingKPICard from "../components/functions/BillingKPICard.jsx";
 import {
-  billingKpis as KPIS,
-  invoices as INVOICES,
-  billingActivity as ACTIVITY,
-  revenueDays as DAYS,
-  incomeSeries as INCOME_SERIES,
-  projectedSeries as PROJECTED_SERIES,
-  paymentMethods as PAYMENT_METHODS,
-  invoiceStatusStyles as STATUS_STYLES,
+  invoices,
+  billingActivity as activity,
+  revenueDays as days,
+  incomeSeries,
+  projectedSeries,
+  paymentMethods,
+  invoiceStatusStyles as statusStyles,
 } from "../data/allData";
 
-const DATE_RANGE_OPTIONS = ["Last 7 Days", "Last 30 Days", "Last 90 Days", "All Time"];
-const METHOD_OPTIONS = ["All", "Credit Card", "Cash", "Insurance", "Others"];
+const dateRangeOptions = ["Last 7 Days", "Last 30 Days", "Last 90 Days", "All Time"];
+const methodOptions = ["All", "Credit Card", "Cash", "Insurance", "Others"];
 
 export default function Billing() {
-  const [invoicesList, setInvoicesList] = useState(INVOICES);
+  const [invoicesList, setInvoicesList] = useState(invoices);
   const [statusFilter, setStatusFilter] = useState("All");
   const [methodFilter, setMethodFilter] = useState("All");
   const [dateRange, setDateRange] = useState("Last 30 Days");
@@ -134,7 +132,7 @@ export default function Billing() {
             </button>
             {isDateOpen && (
               <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
-                {DATE_RANGE_OPTIONS.map((opt) => (
+                {dateRangeOptions.map((opt) => (
                   <button
                     key={opt}
                     onClick={() => {
@@ -179,7 +177,7 @@ export default function Billing() {
             </button>
             {isMethodOpen && (
               <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
-                {METHOD_OPTIONS.map((opt) => (
+                {methodOptions.map((opt) => (
                   <button
                     key={opt}
                     onClick={() => {
@@ -208,7 +206,8 @@ export default function Billing() {
 
       {/* Invoice table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
-        <table className="w-full text-left text-[13px]">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[760px] text-left text-[13px]">
           <thead>
             <tr className="bg-slate-50 text-[10.5px] uppercase tracking-wide text-slate-500">
               <th className="px-5 py-3 font-semibold">Patient Name</th>
@@ -239,7 +238,7 @@ export default function Billing() {
                   <td className="px-5 py-3.5 text-slate-400 font-mono text-[12px]">{inv.invoiceNo}</td>
                   <td className="px-5 py-3.5 font-bold text-ink">{inv.amount}</td>
                   <td className="px-5 py-3.5">
-                    <span className={`text-[11.5px] font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[inv.status]}`}>
+                    <span className={`text-[11.5px] font-semibold px-2.5 py-1 rounded-full ${statusStyles[inv.status]}`}>
                       {inv.status}
                     </span>
                   </td>
@@ -279,6 +278,7 @@ export default function Billing() {
             )}
           </tbody>
         </table>
+        </div>
 
         <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100">
           <span className="text-[12.5px] text-slate-500">Showing 1-10 of 156 Invoices</span>
@@ -318,7 +318,7 @@ export default function Billing() {
             <History size={15} className="text-slate-400" />
           </div>
           <div className="flex flex-col gap-3">
-            {ACTIVITY.map((item) => (
+            {activity.map((item) => (
               <div key={item.title} className="flex items-start gap-3">
                 <div className={`w-8 h-8 rounded-lg ${item.bg} flex items-center justify-center shrink-0`}>
                   <item.icon size={15} className={item.tint} />
@@ -343,15 +343,15 @@ export default function Billing() {
           </div>
           <p className="text-slate-500 text-[12px] mb-4">Cashflow projection for the next 7 days</p>
 
-          <LineChart seriesA={INCOME_SERIES} seriesB={PROJECTED_SERIES} labels={DAYS} />
+          <LineChart seriesA={incomeSeries} seriesB={projectedSeries} labels={days} />
           <div className="flex justify-between text-[11px] text-slate-500 mb-5">
-            {DAYS.map((d) => (
+            {days.map((d) => (
               <span key={d} className="flex-1 text-center">{d}</span>
             ))}
           </div>
 
           <div className="grid grid-cols-4 gap-3 pt-4 border-t border-slate-100">
-            {PAYMENT_METHODS.map((m) => (
+            {paymentMethods.map((m) => (
               <div key={m.label}>
                 <p className="text-[11px] text-slate-500 mb-0.5">{m.label}</p>
                 <p className={`text-[13px] font-bold ${m.color}`}>
@@ -366,10 +366,10 @@ export default function Billing() {
       {/* Create New Invoice modal */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-30 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-sm p-6">
+          <div role="dialog" aria-modal="true" aria-labelledby="create-invoice-title" className="bg-white rounded-xl w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-extrabold text-[16px] text-ink">Create New Invoice</h2>
-              <button onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <h2 id="create-invoice-title" className="font-display font-extrabold text-[16px] text-ink">Create New Invoice</h2>
+              <button type="button" aria-label="Close invoice dialog" onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X size={18} />
               </button>
             </div>
