@@ -1,0 +1,2 @@
+uploads/medical-records/*
+!uploads/medical-records/.gitkeep
